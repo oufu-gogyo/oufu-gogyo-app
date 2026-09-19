@@ -131,6 +131,17 @@ if img_base64:
             letter-spacing: 0.05em;
         }
 
+        /* 各種サブタイトルのフォント・改行最適化 */
+        .omikuji-heading {
+            font-family: 'Shippori Mincho', serif !important;
+            font-size: 1.5rem !important;
+            font-weight: 700 !important;
+            color: #FFE066 !important;
+            text-align: center;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+        }
+
         /* モダンなステップ進捗バー */
         .step-container {
             display: flex;
@@ -445,9 +456,11 @@ if st.session_state.mode is None:
             st.rerun()
 
 elif st.session_state.mode == "omikuji_only":
-    st.subheader("⛩️ 今日の開運おみくじ ⛩️")
+    st.markdown('<div class="omikuji-heading">⛩️ 今日の開運おみくじ ⛩️</div>', unsafe_allow_html=True)
     if st.button("⬅️ 最初に戻る", use_container_width=True):
         st.session_state.mode = None
+        st.session_state.omikuji_text = None
+        st.session_state.omikuji_card_image = None
         st.rerun()
     st.write("ボタンを押すと、本日の運勢と開運おみくじトレカが生成されます！")
     if st.button("☯️ おみくじを引く！ ☯️", type="primary", use_container_width=True, key="omikuji_btn_single"):
@@ -497,6 +510,10 @@ elif st.session_state.mode == "diagnosis":
     if st.button("⬅️ モード選択に戻る", use_container_width=True):
         st.session_state.mode = None
         st.session_state.step = 0
+        st.session_state.result_text = None
+        st.session_state.card_images = None
+        st.session_state.omikuji_text = None
+        st.session_state.omikuji_card_image = None
         st.rerun()
 
     step_labels = ["1. 生年月日", "2. アイコン選択", "3. 鑑定実行"]
@@ -709,6 +726,7 @@ elif st.session_state.mode == "diagnosis":
                 except Exception as e:
                     st.error(f"鑑定中にエラーが発生しました: {e}")
 
+        # ── 常にセッションに保持されている診断結果カードを描画 ──
         if st.session_state.result_text and st.session_state.card_images:
             st.success("✨ 鑑定画像が完成しました！※インスタ用サイズ ✨")
             cols = st.columns(2)
@@ -751,10 +769,12 @@ elif st.session_state.mode == "diagnosis":
             st.markdown(card_html, unsafe_allow_html=True)
 
             st.markdown("---")
-            st.subheader("⛩️ 今日の運試し ⛩️")
+            st.markdown('<div class="omikuji-heading">⛩️ 今日の運試し ⛩️</div>', unsafe_allow_html=True)
             st.write("鑑定結果をご覧いただいたあなたへ。本日の「開運おみくじ」を引いてみませんか！")
+            
             if st.button("☯️ おみくじを引く！ ☯️", type="primary", use_container_width=True, key="omikuji_btn_diag"):
-                if not st.session_state.api_key: st.error("サイドバーで Gemini API Key を入力してください。")
+                if not st.session_state.api_key: 
+                    st.error("サイドバーで Gemini API Key を入力してください。")
                 else:
                     fortune_list = ["超大吉", "大吉", "中吉", "小吉", "吉", "末吉", "凶"]
                     selected_fortune = random.choice(fortune_list)
@@ -788,9 +808,10 @@ elif st.session_state.mode == "diagnosis":
                             omikuji_response = client.models.generate_content(model='gemini-3.6-flash', contents=[omikuji_prompt])
                             st.session_state.omikuji_text = omikuji_response.text
                             st.session_state.omikuji_card_image = generate_omikuji_card_image(selected_fortune, omikuji_response.text)
-                        except Exception as e: st.error(f"おみくじ中にエラーが発生しました: {e}")
+                        except Exception as e: 
+                            st.error(f"おみくじ中にエラーが発生しました: {e}")
 
-    # ── 鑑定結果ページのおみくじ表示エリア ──
-    if st.session_state.mode == "diagnosis" and st.session_state.result_text and st.session_state.omikuji_text and st.session_state.omikuji_card_image:
-        st.success("⛩️ 今日のおみくじ結果がでました！ ⛩️")
-        st.image(st.session_state.omikuji_card_image, use_container_width=True)
+        # ── おみくじ結果データが存在すれば常に表示されるように独立したブロックで描画 ──
+        if st.session_state.omikuji_text and st.session_state.omikuji_card_image:
+            st.success("⛩️ 今日のおみくじ結果がでました！ ⛩️")
+            st.image(st.session_state.omikuji_card_image, use_container_width=True)
