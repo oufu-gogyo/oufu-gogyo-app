@@ -495,7 +495,7 @@ elif st.session_state.mode == "omikuji_only":
 （クスッと笑える親しみやすくユーモアのあるアドバイス）
 """
                     genai.configure(api_key=st.session_state.api_key)
-                    model = genai.GenerativeModel('gemini-1.5-flash')
+                    model = genai.GenerativeModel('gemini-3.6-flash')
                     omikuji_response = model.generate_content(omikuji_prompt)
                     
                     st.session_state.omikuji_text = omikuji_response.text
@@ -655,7 +655,7 @@ elif st.session_state.mode == "diagnosis":
 [誕生日({valid_date})の五行気質「{wuxing_info['user_wuxing']}」と本日の気質「{wuxing_info['today_wuxing']}」を掛け合わせ、今日を最高の1日にするためのアドバイスを伝えてください]
 """
                             genai.configure(api_key=st.session_state.api_key)
-                            model = genai.GenerativeModel('gemini-1.5-flash')
+                            model = genai.GenerativeModel('gemini-3.6-flash')
                             
                             # 画像を安全にバイトデータに変換
                             img_byte_arr = io.BytesIO()
@@ -823,7 +823,7 @@ elif st.session_state.mode == "diagnosis":
 （クスッと笑える親しみやすくユーモアのあるアドバイス）
 """
                             genai.configure(api_key=st.session_state.api_key)
-                            model = genai.GenerativeModel('gemini-1.5-flash')
+                            model = genai.GenerativeModel('gemini-3.6-flash')
                             omikuji_response = model.generate_content(omikuji_prompt)
 
                             st.session_state.omikuji_text = omikuji_response.text
