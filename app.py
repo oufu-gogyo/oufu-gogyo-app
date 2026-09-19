@@ -8,7 +8,7 @@ import math
 import zipfile
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 import streamlit as st
-from google import genai
+import google.generativeai as genai
 
 # ==========================================
 # 1. ページ基本設定 & Session State
@@ -494,21 +494,9 @@ elif st.session_state.mode == "omikuji_only":
 【黒猫陰陽師からの裏ひとこと】
 （クスッと笑える親しみやすくユーモアのあるアドバイス）
 """
-                    client = genai.Client(api_key=st.session_state.api_key)
-                    models_to_try = ['gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-flash']
-                    omikuji_response = None
-                    for m in models_to_try:
-                        try:
-                            omikuji_response = client.models.generate_content(model=m, contents=omikuji_prompt)
-                            break
-                        except Exception:
-                            try:
-                                omikuji_response = client.models.generate_content(model=f"models/{m}", contents=omikuji_prompt)
-                                break
-                            except Exception:
-                                continue
-                    if not omikuji_response:
-                        raise Exception("利用可能なモデルが見つかりませんでした。APIキーを確認してください。")
+                    genai.configure(api_key=st.session_state.api_key)
+                    model = genai.GenerativeModel('gemini-1.5-flash')
+                    omikuji_response = model.generate_content(omikuji_prompt)
                     
                     st.session_state.omikuji_text = omikuji_response.text
                     st.session_state.omikuji_card_image = generate_omikuji_card_image(selected_fortune, omikuji_response.text)
@@ -666,21 +654,9 @@ elif st.session_state.mode == "diagnosis":
 🔮 本日のワンポイント開運鑑定（五行タイプ: {wuxing_info['user_wuxing']}）
 [誕生日({valid_date})の五行気質「{wuxing_info['user_wuxing']}」と本日の気質「{wuxing_info['today_wuxing']}」を掛け合わせ、今日を最高の1日にするためのアドバイスを伝えてください]
 """
-                            client = genai.Client(api_key=st.session_state.api_key)
-                            models_to_try = ['gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-flash']
-                            response = None
-                            for m in models_to_try:
-                                try:
-                                    response = client.models.generate_content(model=m, contents=[image, prompt])
-                                    break
-                                except Exception:
-                                    try:
-                                        response = client.models.generate_content(model=f"models/{m}", contents=[image, prompt])
-                                        break
-                                    except Exception:
-                                        continue
-                            if not response:
-                                raise Exception("利用可能なモデルが見つかりませんでした。APIキーを確認してください。")
+                            genai.configure(api_key=st.session_state.api_key)
+                            model = genai.GenerativeModel('gemini-1.5-flash')
+                            response = model.generate_content([image, prompt])
 
                             result_text = response.text
                             st.session_state.result_text = result_text
@@ -831,21 +807,9 @@ elif st.session_state.mode == "diagnosis":
 【黒猫陰陽師からの裏ひとこと】
 （クスッと笑える親しみやすくユーモアのあるアドバイス）
 """
-                            client = genai.Client(api_key=st.session_state.api_key)
-                            models_to_try = ['gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-flash']
-                            omikuji_response = None
-                            for m in models_to_try:
-                                try:
-                                    omikuji_response = client.models.generate_content(model=m, contents=omikuji_prompt)
-                                    break
-                                except Exception:
-                                    try:
-                                        omikuji_response = client.models.generate_content(model=f"models/{m}", contents=omikuji_prompt)
-                                        break
-                                    except Exception:
-                                        continue
-                            if not omikuji_response:
-                                raise Exception("利用可能なモデルが見つかりませんでした。APIキーを確認してください。")
+                            genai.configure(api_key=st.session_state.api_key)
+                            model = genai.GenerativeModel('gemini-1.5-flash')
+                            omikuji_response = model.generate_content(omikuji_prompt)
 
                             st.session_state.omikuji_text = omikuji_response.text
                             st.session_state.omikuji_card_image = generate_omikuji_card_image(selected_fortune, omikuji_response.text)
