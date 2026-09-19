@@ -263,11 +263,22 @@ def format_wuxing_color(text: str) -> str:
     return text
 
 def get_readable_font(size):
-    font_candidates = ["C:\\Windows\\Fonts\\meiryob.ttc", "C:\\Windows\\Fonts\\meiryo.ttc", "C:\\Windows\\Fonts\\msgothic.ttc", "/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc", "/System/Library/Fonts/Hiragino Sans GB.ttc"]
+    font_candidates = [
+        "/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc",
+        "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+        "/usr/share/fonts/truetype/noto/NotoSansCJK-Bold.ttc",
+        "/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc",
+        "C:\\Windows\\Fonts\\meiryob.ttc",
+        "C:\\Windows\\Fonts\\meiryo.ttc",
+        "C:\\Windows\\Fonts\\msgothic.ttc",
+        "/System/Library/Fonts/Hiragino Sans GB.ttc"
+    ]
     for font_path in font_candidates:
         if os.path.exists(font_path):
-            try: return ImageFont.truetype(font_path, size)
-            except: continue
+            try:
+                return ImageFont.truetype(font_path, size)
+            except:
+                continue
     return ImageFont.load_default()
 
 def wrap_text(text, font, max_width):
