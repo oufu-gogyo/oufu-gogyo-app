@@ -14,7 +14,7 @@ import google.generativeai as genai
 # 0. API Keyの固定設定（テスト用）
 # ==========================================
 # ここにご自身のGemini API Keyを入力してください
-DEFAULT_GEMINI_API_KEY = "AQ.Ab8RN6J9O_fiJEuy5ZWVFIEGlxzw_DwQ5pfA6w5eUoCvNcJASQ"
+DEFAULT_GEMINI_API_KEY = "YOUR_GEMINI_API_KEY_HERE"
 
 # ==========================================
 # 1. ページ基本設定 & Session State
@@ -205,7 +205,7 @@ if img_base64:
             font-weight: bold !important;
         }
 
-        /* 動画サイズをスマホで綺麗に収まる75%＆センター配置 */
+        /* 動画サイズをスマホで綺麗に収まる85%＆センター配置 */
         .video-container-34 {
             max-width: 85% !important;
             margin-left: auto !important;
@@ -255,6 +255,24 @@ st.markdown("""
     <div class="subtitle-text">✨アイコンから『個性と深層心理』を紐解き、開運アドバイスをお届けします✨</div>
 </div>
 """, unsafe_allow_html=True)
+
+# 動画描画用ヘルパー関数
+def render_video(video_filename="cat_video2.mp4"):
+    if os.path.exists(video_filename):
+        with open(video_filename, "rb") as f:
+            v_bytes = f.read()
+        v_base64 = base64.b64encode(v_bytes).decode()
+        v_html = f"""
+        <div class="video-container-34">
+            <video width="100%" autoplay muted loop playsinline style="border-radius: 12px; border: 1.5px solid rgba(255, 215, 0, 0.6); box-shadow: 0 6px 20px rgba(0,0,0,0.5);">
+                <source src="data:video/mp4;base64,{v_base64}" type="video/mp4">
+                お使いのブラウザは動画タグに対応していません。
+            </video>
+        </div>
+        """
+        st.markdown(v_html, unsafe_allow_html=True)
+    else:
+        st.warning(f"動画ファイル '{video_filename}' が見つかりません。")
 
 # ==========================================
 # 3. 万年暦・五行計算 & フォント・描画ヘルパー
@@ -474,22 +492,7 @@ with st.sidebar:
 if st.session_state.mode is None:
     st.markdown('<div class="choice-title">✨ どちらにしますニャ？ ✨</div>', unsafe_allow_html=True)
     
-    video_path = "cat_video.mp4"
-    if os.path.exists(video_path):
-        with open(video_path, "rb") as f:
-            video_bytes = f.read()
-        video_base64 = base64.b64encode(video_bytes).decode()
-        video_html = f"""
-        <div class="video-container-34">
-            <video width="100%" autoplay muted loop playsinline style="border-radius: 12px; border: 1.5px solid rgba(255, 215, 0, 0.6); box-shadow: 0 6px 20px rgba(0,0,0,0.5);">
-                <source src="data:video/mp4;base64,{video_base64}" type="video/mp4">
-                お使いのブラウザは動画タグに対応していません。
-            </video>
-        </div>
-        """
-        st.markdown(video_html, unsafe_allow_html=True)
-    else:
-        st.warning(f"動画ファイル '{video_path}' が見つかりません。")
+    render_video("cat_video.mp4")
 
     col_a, col_b = st.columns(2)
     with col_a:
@@ -519,9 +522,13 @@ elif st.session_state.mode == "omikuji_only":
             fortune_list = ["超大吉", "大吉", "中吉", "小吉", "吉", "末吉", "凶"]
             selected_fortune = random.choice(fortune_list)
             st.session_state.omikuji_result_type = selected_fortune
-            with st.spinner("黒猫がみくじ筒をシャカシャカ振り振り、おみくじデータを錬成中..."):
-                try:
-                    omikuji_prompt = f"""
+            
+            status_holder = st.empty()
+            with status_holder.container():
+                render_video("cat_video2.mp4")
+                with st.spinner("黒猫がみくじ筒をシャカシャカ振り振り、おみくじデータを錬成中..."):
+                    try:
+                        omikuji_prompt = f"""
 あなたは黒猫の陰陽師です。本格的で読み応えのある神社のおみくじの文章を作成してください。
 今回の運勢結果は『{selected_fortune}』です。
 以下の項目に沿って、少しのユーモアと温かい知性を含め、充実した内容で記述してください。
@@ -544,14 +551,15 @@ elif st.session_state.mode == "omikuji_only":
 【黒猫陰陽師からの裏ひとこと】
 （クスッと笑える親しみやすくユーモアのあるアドバイス）
 """
-                    genai.configure(api_key=active_key)
-                    model = genai.GenerativeModel('gemini-3.6-flash')
-                    omikuji_response = model.generate_content(omikuji_prompt)
-                    
-                    st.session_state.omikuji_text = omikuji_response.text
-                    st.session_state.omikuji_card_image = generate_omikuji_card_image(selected_fortune, omikuji_response.text)
-                except Exception as e:
-                    st.error(f"おみくじ生成中にエラーが発生しました: {e}")
+                        genai.configure(api_key=active_key)
+                        model = genai.GenerativeModel('gemini-3.6-flash')
+                        omikuji_response = model.generate_content(omikuji_prompt)
+                        
+                        st.session_state.omikuji_text = omikuji_response.text
+                        st.session_state.omikuji_card_image = generate_omikuji_card_image(selected_fortune, omikuji_response.text)
+                    except Exception as e:
+                        st.error(f"おみくじ生成中にエラーが発生しました: {e}")
+            status_holder.empty()
 
     if st.session_state.omikuji_text and st.session_state.omikuji_card_image:
         st.success("⛩️ 今日のおみくじ結果がでました！ ⛩️ (タップで拡大できます)")
@@ -659,22 +667,7 @@ elif st.session_state.mode == "diagnosis":
 
                     status_holder = st.empty()
                     with status_holder.container():
-                        loading_video_path = "cat_video3.mp4"
-                        if os.path.exists(loading_video_path):
-                            with open(loading_video_path, "rb") as f:
-                                l_video_bytes = f.read()
-                            l_video_base64 = base64.b64encode(l_video_bytes).decode()
-                            l_video_html = f"""
-                            <div class="video-container-34">
-                                <video width="100%" autoplay muted loop playsinline style="border-radius: 12px; border: 1.5px solid rgba(255, 215, 0, 0.6); box-shadow: 0 6px 20px rgba(0,0,0,0.5);">
-                                    <source src="data:video/mp4;base64,{l_video_base64}" type="video/mp4">
-                                    お使いのブラウザは動画タグに対応していません。
-                                </video>
-                            </div>
-                            """
-                            st.markdown(l_video_html, unsafe_allow_html=True)
-                        else:
-                            st.warning(f"動画ファイル '{loading_video_path}' が見つかりません。")
+                        render_video("cat_video3.mp4")
 
                         with st.spinner("深層心理を解析し、鑑定結果を錬成中..."):
                             prompt = f"""
@@ -843,15 +836,19 @@ elif st.session_state.mode == "diagnosis":
             
             if st.button("☯️ おみくじを引く！ ☯️", type="primary", use_container_width=True, key="omikuji_btn_diag"):
                 active_key = get_api_key()
-                if not active_key or active_key == "YOUR_GEMINI_API_KEY_HERE":
+                if not active_key or active_key == "AQ.Ab8RN6J9O_fiJEuy5ZWVFIEGlxzw_DwQ5pfA6w5eUoCvNcJASQ":
                     st.error("コード内の DEFAULT_GEMINI_API_KEY にAPI Keyを設定してください。")
                 else:
                     fortune_list = ["超大吉", "大吉", "中吉", "小吉", "吉", "末吉", "凶"]
                     selected_fortune = random.choice(fortune_list)
                     st.session_state.omikuji_result_type = selected_fortune
-                    with st.spinner("黒猫がみくじ筒をシャカシャカ振り振り、おみくじデータを錬成中..."):
-                        try:
-                            omikuji_prompt = f"""
+                    
+                    status_holder_diag = st.empty()
+                    with status_holder_diag.container():
+                        render_video("cat_video4.mp4")
+                        with st.spinner("黒猫がみくじ筒をシャカシャカ振り振り、おみくじデータを錬成中..."):
+                            try:
+                                omikuji_prompt = f"""
 あなたは黒猫の陰陽師です。本格的で読み応えのある神社のおみくじの文章を作成してください。
 今回の運勢結果は『{selected_fortune}』です。
 以下の項目に沿って、少しのユーモアと温かい知性を含め、充実した内容で記述してください。
@@ -874,14 +871,15 @@ elif st.session_state.mode == "diagnosis":
 【黒猫陰陽師からの裏ひとこと】
 （クスッと笑える親しみやすくユーモアのあるアドバイス）
 """
-                            genai.configure(api_key=active_key)
-                            model = genai.GenerativeModel('gemini-3.6-flash')
-                            omikuji_response = model.generate_content(omikuji_prompt)
+                                genai.configure(api_key=active_key)
+                                model = genai.GenerativeModel('gemini-3.6-flash')
+                                omikuji_response = model.generate_content(omikuji_prompt)
 
-                            st.session_state.omikuji_text = omikuji_response.text
-                            st.session_state.omikuji_card_image = generate_omikuji_card_image(selected_fortune, omikuji_response.text)
-                        except Exception as e: 
-                            st.error(f"おみくじ中にエラーが発生しました: {e}")
+                                st.session_state.omikuji_text = omikuji_response.text
+                                st.session_state.omikuji_card_image = generate_omikuji_card_image(selected_fortune, omikuji_response.text)
+                            except Exception as e: 
+                                st.error(f"おみくじ中にエラーが発生しました: {e}")
+                    status_holder_diag.empty()
 
         # ── おみくじ結果データが存在すれば常に表示されるように独立したブロックで描画 ──
         if st.session_state.omikuji_text and st.session_state.omikuji_card_image:
