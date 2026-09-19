@@ -131,7 +131,6 @@ if img_base64:
             letter-spacing: 0.05em;
         }
 
-        /* 各種サブタイトルのフォント・改行最適化 */
         .omikuji-heading {
             font-family: 'Shippori Mincho', serif !important;
             font-size: 1.5rem !important;
@@ -496,7 +495,7 @@ elif st.session_state.mode == "omikuji_only":
 （クスッと笑える親しみやすくユーモアのあるアドバイス）
 """
                     client = genai.Client(api_key=st.session_state.api_key)
-                    omikuji_response = client.models.generate_content(model='gemini-3.6-flash', contents=[omikuji_prompt])
+                    omikuji_response = client.models.generate_content(model='gemini-2.5-flash', contents=[omikuji_prompt])
                     st.session_state.omikuji_text = omikuji_response.text
                     st.session_state.omikuji_card_image = generate_omikuji_card_image(selected_fortune, omikuji_response.text)
                 except Exception as e:
@@ -654,7 +653,7 @@ elif st.session_state.mode == "diagnosis":
 [誕生日({valid_date})の五行気質「{wuxing_info['user_wuxing']}」と本日の気質「{wuxing_info['today_wuxing']}」を掛け合わせ、今日を最高の1日にするためのアドバイスを伝えてください]
 """
                             client = genai.Client(api_key=st.session_state.api_key)
-                            response = client.models.generate_content(model='gemini-3.6-flash', contents=[image, prompt])
+                            response = client.models.generate_content(model='gemini-2.5-flash', contents=[image, prompt])
                             result_text = response.text
                             st.session_state.result_text = result_text
 
@@ -805,7 +804,7 @@ elif st.session_state.mode == "diagnosis":
 （クスッと笑える親しみやすくユーモアのあるアドバイス）
 """
                             client = genai.Client(api_key=st.session_state.api_key)
-                            omikuji_response = client.models.generate_content(model='gemini-3.6-flash', contents=[omikuji_prompt])
+                            omikuji_response = client.models.generate_content(model='gemini-2.5-flash', contents=[omikuji_prompt])
                             st.session_state.omikuji_text = omikuji_response.text
                             st.session_state.omikuji_card_image = generate_omikuji_card_image(selected_fortune, omikuji_response.text)
                         except Exception as e: 
