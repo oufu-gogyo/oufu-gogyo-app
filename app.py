@@ -217,12 +217,19 @@ if img_base64:
             display: flex !important;
             justify-content: center !important;
             align-items: center !important;
+            cursor: pointer;
         }
         .omikuji-img-wrapper img {
             max-width: 100% !important;
             height: auto !important;
             border-radius: 12px;
             box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+        }
+
+        /* 説明用センタリングメッセージクラス */
+        .center-msg {
+            text-align: center !important;
+            margin-bottom: 1rem !important;
         }
         </style>
     """
@@ -395,52 +402,53 @@ def generate_carousel_images(user_icon_img, type_name, wuxing_type, tags, params
     return images
 
 def generate_omikuji_card_image(fortune_type, omikuji_raw_text):
-    # スマホで見やすい 4:5 アスペクト比 (1080x1350) に最適化
-    card_w, card_h = 1080, 1350
+    # スマホ可読性重視の縦長カード型 (1080x1500)
+    card_w, card_h = 1080, 1500
     card = Image.new("RGBA", (card_w, card_h), (25, 18, 30, 255))
     draw = ImageDraw.Draw(card)
     
-    # スマホ画面向けにフォントサイズと行間を調整
-    title_font = get_readable_font(34)
-    fortune_font = get_readable_font(64)
-    heading_font = get_readable_font(25)
-    body_font = get_readable_font(20)
-    footer_font = get_readable_font(20)
+    # フォントサイズ設定
+    title_font = get_readable_font(38)
+    fortune_font = get_readable_font(72)
+    heading_font = get_readable_font(30)
+    body_font = get_readable_font(24)
+    footer_font = get_readable_font(22)
     
     # 枠線描画
     draw.rectangle([20, 20, card_w - 20, card_h - 20], outline=(212, 175, 55), width=5)
     draw.rectangle([30, 30, card_w - 30, card_h - 30], outline=(255, 224, 102), width=2)
-    draw.text((card_w // 2, 60), "― 陰陽開運おみくじ ―", font=title_font, fill=(255, 224, 102), anchor="mm")
+    draw.text((card_w // 2, 65), "― 陰陽開運おみくじ ―", font=title_font, fill=(255, 224, 102), anchor="mm")
     
     # 運勢表示
     fortune_color = (255, 90, 90) if fortune_type in ["超大吉", "大吉"] else ((180, 200, 210) if fortune_type == "凶" else (255, 224, 102))
-    draw.rectangle([card_w // 2 - 160, 95, card_w // 2 + 160, 180], fill=(40, 25, 45), outline=fortune_color, width=4)
-    draw.text((card_w // 2, 137), fortune_type, font=fortune_font, fill=fortune_color, anchor="mm")
+    draw.rectangle([card_w // 2 - 180, 100, card_w // 2 + 180, 195], fill=(40, 25, 45), outline=fortune_color, width=4)
+    draw.text((card_w // 2, 147), fortune_type, font=fortune_font, fill=fortune_color, anchor="mm")
     
     # 本文枠
-    box_top, box_bottom = 200, 1280
+    box_top, box_bottom = 215, 1420
     draw.rectangle([45, box_top, card_w - 45, box_bottom], fill=(18, 12, 24), outline=(100, 80, 120), width=2)
     
     lines = omikuji_raw_text.split('\n')
-    y_offset = box_top + 15
+    y_offset = box_top + 20
     for line in lines:
-        if y_offset > box_bottom - 25: break
+        if y_offset > box_bottom - 30: break
         clean_line = re.sub(r'\*+', '', line).strip()
         if not clean_line or clean_line.startswith("---") or clean_line.startswith("==="): continue
         
+        # 文章レイアウトをセンター配置に変更
         if "【" in clean_line and "】" in clean_line:
-            y_offset += 6
-            draw.text((65, y_offset), clean_line, font=heading_font, fill=(255, 220, 100))
-            y_offset += 28
+            y_offset += 10
+            draw.text((card_w // 2, y_offset), clean_line, font=heading_font, fill=(255, 220, 100), anchor="mm")
+            y_offset += 36
         else:
             wrapped = wrap_text(clean_line, body_font, 950)
             for w in wrapped:
-                if y_offset > box_bottom - 20: break
-                draw.text((65, y_offset), w, font=body_font, fill=(240, 240, 250))
-                y_offset += 24
-            y_offset += 3
+                if y_offset > box_bottom - 25: break
+                draw.text((card_w // 2, y_offset), w, font=body_font, fill=(240, 240, 250), anchor="mm")
+                y_offset += 30
+            y_offset += 4
 
-    draw.text((card_w // 2, 1315), "--- 陰陽SNSアイコン診断 & 開運おみくじ ---", font=footer_font, fill=(160, 170, 190), anchor="mm")
+    draw.text((card_w // 2, 1455), "--- 陰陽SNSアイコン診断 & 開運おみくじ ---", font=footer_font, fill=(160, 170, 190), anchor="mm")
     return card
 
 # ==========================================
@@ -492,7 +500,8 @@ elif st.session_state.mode == "omikuji_only":
         st.session_state.omikuji_text = None
         st.session_state.omikuji_card_image = None
         st.rerun()
-    st.write("ボタンを押すと、本日の運勢と開運おみくじが生成されます！")
+        
+    st.markdown('<p class="center-msg">ボタンを押すと、本日の運勢と開運おみくじが生成されます！</p>', unsafe_allow_html=True)
     if st.button("☯️ おみくじを引く！ ☯️", type="primary", use_container_width=True, key="omikuji_btn_single"):
         if not st.session_state.api_key:
             st.error("サイドバーで Gemini API Key を入力してください。")
@@ -535,10 +544,8 @@ elif st.session_state.mode == "omikuji_only":
                     st.error(f"おみくじ生成中にエラーが発生しました: {e}")
 
     if st.session_state.omikuji_text and st.session_state.omikuji_card_image:
-        st.success("⛩️ 今日のおみくじ結果がでました！ ⛩️")
-        st.markdown('<div class="omikuji-img-wrapper">', unsafe_allow_html=True)
-        st.image(st.session_state.omikuji_card_image, use_container_width=True)
-        st.markdown('</div>', unsafe_allow_html=True)
+        st.success("⛩️ 今日のおみくじ結果がでました！ ⛩️ (タップで拡大できます)")
+        st.image(st.session_state.omikuji_card_image, use_column_width=True)
 
 elif st.session_state.mode == "diagnosis":
     if st.button("⬅️ モード選択に戻る", use_container_width=True):
@@ -595,7 +602,7 @@ elif st.session_state.mode == "diagnosis":
         if uploaded_file is not None:
             st.session_state.uploaded_file = uploaded_file
             col1, col2, col3 = st.columns([1, 2, 1])
-            with col2: st.image(Image.open(uploaded_file), caption="📷 選択されたアイコンプレビュー", use_container_width=True)
+            with col2: st.image(Image.open(uploaded_file), caption="📷 選択されたアイコンプレビュー", use_column_width=True)
         st.write("")
         col_prev, col_next = st.columns(2)
         with col_prev:
@@ -782,7 +789,7 @@ elif st.session_state.mode == "diagnosis":
             st.success("✨ 鑑定画像が完成しました！※インスタ用サイズ ✨")
             cols = st.columns(2)
             for i, img in enumerate(st.session_state.card_images):
-                cols[i % 2].image(img, caption=f"【{i+1}枚目】", use_container_width=True)
+                cols[i % 2].image(img, caption=f"【{i+1}枚目】", use_column_width=True)
                 
             buf = io.BytesIO()
             with zipfile.ZipFile(buf, "w") as z:
@@ -821,7 +828,7 @@ elif st.session_state.mode == "diagnosis":
 
             st.markdown("---")
             st.markdown('<div class="omikuji-heading">⛩️ 今日の運試し ⛩️</div>', unsafe_allow_html=True)
-            st.write("鑑定結果をご覧いただいたあなたへ。本日の「開運おみくじ」を引いてみませんか！")
+            st.markdown('<p class="center-msg">鑑定結果をご覧いただいたあなたへ。本日の「開運おみくじ」を引いてみませんか！</p>', unsafe_allow_html=True)
             
             if st.button("☯️ おみくじを引く！ ☯️", type="primary", use_container_width=True, key="omikuji_btn_diag"):
                 if not st.session_state.api_key: 
@@ -866,7 +873,5 @@ elif st.session_state.mode == "diagnosis":
 
         # ── おみくじ結果データが存在すれば常に表示されるように独立したブロックで描画 ──
         if st.session_state.omikuji_text and st.session_state.omikuji_card_image:
-            st.success("⛩️ 今日のおみくじ結果がでました！ ⛩️")
-            st.markdown('<div class="omikuji-img-wrapper">', unsafe_allow_html=True)
-            st.image(st.session_state.omikuji_card_image, use_container_width=True)
-            st.markdown('</div>', unsafe_allow_html=True)
+            st.success("⛩️ 今日のおみくじ結果がでました！ ⛩️ (タップで拡大できます)")
+            st.image(st.session_state.omikuji_card_image, use_column_width=True)
