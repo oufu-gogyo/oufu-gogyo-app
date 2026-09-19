@@ -93,10 +93,9 @@ if img_base64:
             font-weight: 700;
             letter-spacing: 0.08em;
             margin-bottom: 0.5rem;
-            box-shadow: 0 0 12px rgba(255, 215, 0, 0.2);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
         }
         
-        /* スマホ画面に合わせてタイトルサイズと改行を美しく調整 */
         .main-title-text {
             font-family: 'Shippori Mincho', serif !important;
             font-size: 1.85rem !important;
@@ -121,7 +120,6 @@ if img_base64:
             line-height: 1.4;
         }
 
-        /* モード選択のセクションタイトル（どちらにしますか？） */
         .choice-title {
             text-align: center;
             font-family: 'Shippori Mincho', serif !important;
@@ -162,14 +160,7 @@ if img_base64:
             box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
         }
 
-        /* 一般テキストの視認性確保 */
-        .stApp h1, .stApp h2, .stApp h3, .stApp p, .stApp span {
-            color: #FFFFFF !important;
-            text-shadow: 0px 2px 6px rgba(0, 0, 0, 0.9);
-            font-weight: 600;
-        }
-
-        /* アップロード枠のカスタマイズ */
+        /* アップロード枠 */
         .upload-card-container {
             background: linear-gradient(135deg, rgba(30, 35, 60, 0.85) 0%, rgba(15, 20, 35, 0.9) 100%);
             border: 2px dashed rgba(255, 215, 0, 0.6);
@@ -180,15 +171,7 @@ if img_base64:
             box-shadow: 0 8px 32px rgba(0,0,0,0.4);
         }
 
-        /* モード選択ボタンの背景透過・デザイン */
-        div.stButton > button:nth-child(1),
-        div.stButton > button:nth-child(2) {
-            background-color: rgba(255, 255, 255, 0.35) !important;
-            border: 1px solid rgba(255, 255, 255, 0.5) !important;
-            font-weight: bold !important;
-        }
-
-        /* 動画サイズをスマホで綺麗に収まる75%＆センター配置 */
+        /* 動画サイズ */
         .video-container-34 {
             max-width: 85% !important;
             margin-left: auto !important;
@@ -208,7 +191,7 @@ if img_base64:
 
 st.markdown('<meta name="google" content="notranslate">', unsafe_allow_html=True)
 
-# ヒーローヘッダー（タイトルをスマホで綺麗に折り返すHTML構成）
+# ヒーローヘッダー
 st.markdown("""
 <div class="hero-header notranslate">
     <div class="hero-badge">✨ AI陰陽心理鑑定 ✨</div>
@@ -416,10 +399,8 @@ with st.sidebar:
 # 5. モード選択 & ステップ進捗管理
 # ==========================================
 if st.session_state.mode is None:
-    # ── 「どちらにしますか？」のセクションタイトルをデザインされた見出しに変更 ──
     st.markdown('<div class="choice-title">✨ どちらにしますか？ ✨</div>', unsafe_allow_html=True)
     
-    # トップページの動画（スマホ向けに最適化されたサイズ）
     video_path = "cat_video.mp4"
     if os.path.exists(video_path):
         with open(video_path, "rb") as f:
@@ -594,7 +575,6 @@ elif st.session_state.mode == "diagnosis":
 
                     status_holder = st.empty()
                     with status_holder.container():
-                        # 鑑定中のローディング動画（cat_video3.mp4）
                         loading_video_path = "cat_video3.mp4"
                         if os.path.exists(loading_video_path):
                             with open(loading_video_path, "rb") as f:
@@ -739,16 +719,16 @@ elif st.session_state.mode == "diagnosis":
                 if clean_line.startswith("■ 診断結果："): formatted_html_body += f"<div style='color:#FFD700; font-size:1.30rem; font-weight:bold; margin-top:1.2rem; margin-bottom:0.6rem; border-bottom:1px solid #FFD700; padding-bottom:0.3rem;'>{clean_line}</div>"
                 elif clean_line.startswith("■ 3つのハッシュタグ:"): formatted_html_body += f"<div style='color:#FFE066; font-size:1.05rem; font-weight:bold; margin-bottom:0.6rem;'>{clean_line}</div>"
                 elif clean_line.startswith("■ パラメータ:"): continue
-                elif clean_line.startswith("1. "): formatted_html_body += f"<div style='color:#4EAEFF; font-size:1.12rem; font-weight:bold; margin-top:1.2rem; margin-bottom:0.4rem;'>{clean_line}</div>"
-                elif clean_line.startswith("2. "): formatted_html_body += f"<div style='color:#40E0D0; font-size:1.12rem; font-weight:bold; margin-top:1.2rem; margin-bottom:0.4rem;'>{clean_line}</div>"
-                elif clean_line.startswith("3. "): formatted_html_body += f"<div style='color:#FF8C00; font-size:1.12rem; font-weight:bold; margin-top:1.2rem; margin-bottom:0.4rem;'>{clean_line}</div>"
+                elif clean_line.startswith("1. "): formatted_html_body += f"<div class='result-section-title' style='color:#4EAEFF;'>{clean_line}</div>"
+                elif clean_line.startswith("2. "): formatted_html_body += f"<div class='result-section-title' style='color:#40E0D0;'>{clean_line}</div>"
+                elif clean_line.startswith("3. "): formatted_html_body += f"<div class='result-section-title' style='color:#FF8C00;'>{clean_line}</div>"
                 elif clean_line.startswith("🔮 本日のワンポイント開運鑑定"): formatted_html_body += f"<div style='color:#E0B0FF; font-size:1.2rem; font-weight:bold; margin-top:1.4rem; margin-bottom:0.6rem; border-bottom:1px solid #E0B0FF; padding-bottom:0.3rem;'>{clean_line}</div>"
-                elif clean_line.startswith("・"): formatted_html_body += f"<div style='color:#FFF3C4; font-size:0.98rem; line-height:1.6; margin-bottom:0.3rem; padding-left:0.5rem;'>{clean_line}</div>"
+                elif clean_line.startswith("・"): formatted_html_body += f"<div class='result-paragraph' style='color:#FFF3C4; padding-left:0.5rem;'>{clean_line}</div>"
                 elif clean_line == "": formatted_html_body += "<div style='height:0.5rem;'></div>"
-                else: formatted_html_body += f"<div style='color:#FFFFFF; font-size:0.98rem; line-height:1.7; margin-bottom:0.4rem;'>{clean_line}</div>"
+                else: formatted_html_body += f"<div class='result-paragraph'>{clean_line}</div>"
 
             card_html = f"""
-            <div class="notranslate" style="background: rgba(10, 15, 25, 0.75); backdrop-filter: blur(8px); border: 1.5px solid rgba(212, 175, 55, 0.8); border-radius: 14px; padding: 1.5rem; margin-top: 1.2rem; margin-bottom: 2.0rem;">
+            <div class="notranslate diagnosis-result-box">
                 <h3 style="color:#FFE066; text-align:center; margin-top:0; font-size: 1.2rem;">📖 鑑定結果の詳細</h3>
                 {formatted_html_body}
             </div>
