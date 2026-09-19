@@ -11,6 +11,12 @@ import streamlit as st
 import google.generativeai as genai
 
 # ==========================================
+# 0. API Keyの固定設定（テスト用）
+# ==========================================
+# ここにご自身のGemini API Keyを入力してください
+DEFAULT_GEMINI_API_KEY = "AQ.Ab8RN6J9O_fiJEuy5ZWVFIEGlxzw_DwQ5pfA6w5eUoCvNcJASQ"
+
+# ==========================================
 # 1. ページ基本設定 & Session State
 # ==========================================
 st.set_page_config(page_title="SNSアイコン個性診断＆開運鑑定", page_icon="☯️", layout="centered")
@@ -32,7 +38,10 @@ if "omikuji_result_type" not in st.session_state:
 if "omikuji_card_image" not in st.session_state:
     st.session_state.omikuji_card_image = None
 if "api_key" not in st.session_state:
-    st.session_state.api_key = ""
+    st.session_state.api_key = DEFAULT_GEMINI_API_KEY
+
+def get_api_key():
+    return st.session_state.api_key if st.session_state.api_key else DEFAULT_GEMINI_API_KEY
 
 # ==========================================
 # 2. 背景画像（bg.jpg）＆最新トレンドデザイン設定
@@ -456,7 +465,7 @@ def generate_omikuji_card_image(fortune_type, omikuji_raw_text):
 # ==========================================
 with st.sidebar:
     st.header("⚙️ 設定")
-    st.session_state.api_key = st.text_input("Gemini API Key を入力", value=st.session_state.api_key, type="password")
+    st.session_state.api_key = st.text_input("Gemini API Key (変更する場合のみ入力)", value=st.session_state.api_key, type="password")
     st.markdown("[Gemini API Keyの取得はこちら](https://aistudio.google.com/app/apikey)")
 
 # ==========================================
@@ -503,8 +512,9 @@ elif st.session_state.mode == "omikuji_only":
         
     st.markdown('<p class="center-msg">ボタンを押すと、本日の運勢と開運おみくじが生成されます！</p>', unsafe_allow_html=True)
     if st.button("☯️ おみくじを引く！ ☯️", type="primary", use_container_width=True, key="omikuji_btn_single"):
-        if not st.session_state.api_key:
-            st.error("サイドバーで Gemini API Key を入力してください。")
+        active_key = get_api_key()
+        if not active_key or active_key == "YOUR_GEMINI_API_KEY_HERE":
+            st.error("コード内の DEFAULT_GEMINI_API_KEY にAPI Keyを設定してください。")
         else:
             fortune_list = ["超大吉", "大吉", "中吉", "小吉", "吉", "末吉", "凶"]
             selected_fortune = random.choice(fortune_list)
@@ -534,7 +544,7 @@ elif st.session_state.mode == "omikuji_only":
 【黒猫陰陽師からの裏ひとこと】
 （クスッと笑える親しみやすくユーモアのあるアドバイス）
 """
-                    genai.configure(api_key=st.session_state.api_key)
+                    genai.configure(api_key=active_key)
                     model = genai.GenerativeModel('gemini-3.6-flash')
                     omikuji_response = model.generate_content(omikuji_prompt)
                     
@@ -545,7 +555,7 @@ elif st.session_state.mode == "omikuji_only":
 
     if st.session_state.omikuji_text and st.session_state.omikuji_card_image:
         st.success("⛩️ 今日のおみくじ結果がでました！ ⛩️ (タップで拡大できます)")
-        st.image(st.session_state.omikuji_card_image, use_column_width=True)
+        st.image(st.session_state.omikuji_card_image, use_container_width=True)
 
 elif st.session_state.mode == "diagnosis":
     if st.button("⬅️ モード選択に戻る", use_container_width=True):
@@ -602,7 +612,7 @@ elif st.session_state.mode == "diagnosis":
         if uploaded_file is not None:
             st.session_state.uploaded_file = uploaded_file
             col1, col2, col3 = st.columns([1, 2, 1])
-            with col2: st.image(Image.open(uploaded_file), caption="📷 選択されたアイコンプレビュー", use_column_width=True)
+            with col2: st.image(Image.open(uploaded_file), caption="📷 選択されたアイコンプレビュー", use_container_width=True)
         st.write("")
         col_prev, col_next = st.columns(2)
         with col_prev:
@@ -631,8 +641,9 @@ elif st.session_state.mode == "diagnosis":
             except:
                 valid_date = None
 
-            if not st.session_state.api_key:
-                st.error("サイドバーで Gemini API Key を入力してください。")
+            active_key = get_api_key()
+            if not active_key or active_key == "YOUR_GEMINI_API_KEY_HERE":
+                st.error("コード内の DEFAULT_GEMINI_API_KEY にAPI Keyを設定してください。")
             elif valid_date is None:
                 st.error("生年月日のフォーマットが正しくありません。")
             elif "uploaded_file" not in st.session_state or st.session_state.uploaded_file is None:
@@ -694,7 +705,7 @@ elif st.session_state.mode == "diagnosis":
 🔮 本日のワンポイント開運鑑定（五行タイプ: {wuxing_info['user_wuxing']}）
 [誕生日({valid_date})の五行気質「{wuxing_info['user_wuxing']}」と本日の気質「{wuxing_info['today_wuxing']}」を掛け合わせ、今日を最高の1日にするためのアドバイスを伝えてください]
 """
-                            genai.configure(api_key=st.session_state.api_key)
+                            genai.configure(api_key=active_key)
                             model = genai.GenerativeModel('gemini-3.6-flash')
                             
                             # 画像を安全にバイトデータに変換
@@ -789,7 +800,7 @@ elif st.session_state.mode == "diagnosis":
             st.success("✨ 鑑定画像が完成しました！※インスタ用サイズ ✨")
             cols = st.columns(2)
             for i, img in enumerate(st.session_state.card_images):
-                cols[i % 2].image(img, caption=f"【{i+1}枚目】", use_column_width=True)
+                cols[i % 2].image(img, caption=f"【{i+1}枚目】", use_container_width=True)
                 
             buf = io.BytesIO()
             with zipfile.ZipFile(buf, "w") as z:
@@ -831,8 +842,9 @@ elif st.session_state.mode == "diagnosis":
             st.markdown('<p class="center-msg">鑑定結果をご覧いただいたあなたへ。本日の「開運おみくじ」を引いてみませんか！</p>', unsafe_allow_html=True)
             
             if st.button("☯️ おみくじを引く！ ☯️", type="primary", use_container_width=True, key="omikuji_btn_diag"):
-                if not st.session_state.api_key: 
-                    st.error("サイドバーで Gemini API Key を入力してください。")
+                active_key = get_api_key()
+                if not active_key or active_key == "YOUR_GEMINI_API_KEY_HERE":
+                    st.error("コード内の DEFAULT_GEMINI_API_KEY にAPI Keyを設定してください。")
                 else:
                     fortune_list = ["超大吉", "大吉", "中吉", "小吉", "吉", "末吉", "凶"]
                     selected_fortune = random.choice(fortune_list)
@@ -862,7 +874,7 @@ elif st.session_state.mode == "diagnosis":
 【黒猫陰陽師からの裏ひとこと】
 （クスッと笑える親しみやすくユーモアのあるアドバイス）
 """
-                            genai.configure(api_key=st.session_state.api_key)
+                            genai.configure(api_key=active_key)
                             model = genai.GenerativeModel('gemini-3.6-flash')
                             omikuji_response = model.generate_content(omikuji_prompt)
 
@@ -874,4 +886,4 @@ elif st.session_state.mode == "diagnosis":
         # ── おみくじ結果データが存在すれば常に表示されるように独立したブロックで描画 ──
         if st.session_state.omikuji_text and st.session_state.omikuji_card_image:
             st.success("⛩️ 今日のおみくじ結果がでました！ ⛩️ (タップで拡大できます)")
-            st.image(st.session_state.omikuji_card_image, use_column_width=True)
+            st.image(st.session_state.omikuji_card_image, use_container_width=True)
