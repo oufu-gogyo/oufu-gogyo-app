@@ -525,7 +525,7 @@ elif st.session_state.mode == "omikuji_only":
             
             status_holder = st.empty()
             with status_holder.container():
-                render_video("cat_video2.mp4")
+                render_video("cat_video4.mp4")
                 with st.spinner("黒猫がみくじ筒をシャカシャカ振り振り、おみくじデータを錬成中..."):
                     try:
                         omikuji_prompt = f"""
