@@ -656,7 +656,22 @@ elif st.session_state.mode == "diagnosis":
 """
                             genai.configure(api_key=st.session_state.api_key)
                             model = genai.GenerativeModel('gemini-1.5-flash')
-                            response = model.generate_content([image, prompt])
+                            
+                            # 画像を安全にバイトデータに変換
+                            img_byte_arr = io.BytesIO()
+                            img_format = image.format if image.format and image.format.upper() in ["PNG", "JPEG", "JPG"] else "JPEG"
+                            image.save(img_byte_arr, format=img_format)
+                            img_bytes = img_byte_arr.getvalue()
+                            mime_type = f"image/{img_format.lower()}"
+                            if mime_type == "image/jpg":
+                                mime_type = "image/jpeg"
+
+                            image_part = {
+                                "mime_type": mime_type,
+                                "data": img_bytes
+                            }
+
+                            response = model.generate_content([prompt, image_part])
 
                             result_text = response.text
                             st.session_state.result_text = result_text
