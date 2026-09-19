@@ -68,74 +68,88 @@ if img_base64:
 
         /* 全体のメインコンテナ（ガラスモーフィズム） */
         .main .block-container {
-            background: rgba(10, 12, 24, 0.65) !important;
+            background: rgba(10, 12, 24, 0.7) !important;
             backdrop-filter: blur(12px) !important;
             -webkit-backdrop-filter: blur(12px) !important;
-            border-radius: 24px;
-            border: 1px solid rgba(255, 215, 0, 0.25);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 215, 0, 0.3);
             box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
-            padding: 2.5rem 2rem;
+            padding: 1.5rem 1rem;
         }
 
-        /* ヘッダー・タイトルの洗練されたスタイル */
+        /* ヘッダー・タイトルのスマホ最適化スタイル */
         .hero-header {
             text-align: center;
-            padding: 1rem 0 0.5rem 0;
+            padding: 0.5rem 0 0.2rem 0;
         }
         .hero-badge {
             display: inline-block;
             background: linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,140,0,0.2));
             border: 1px solid rgba(255, 215, 0, 0.5);
             color: #FFE066;
-            padding: 4px 16px;
+            padding: 3px 12px;
             border-radius: 50px;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: 700;
-            letter-spacing: 0.1em;
-            margin-bottom: 0.8rem;
-            box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+            letter-spacing: 0.08em;
+            margin-bottom: 0.5rem;
+            box-shadow: 0 0 12px rgba(255, 215, 0, 0.2);
         }
         
-        /* タイトル部分：Shippori Mincho・濃いめグラデーション */
+        /* スマホ画面に合わせてタイトルサイズと改行を美しく調整 */
         .main-title-text {
             font-family: 'Shippori Mincho', serif !important;
-            font-size: 2.5rem !important;
+            font-size: 1.85rem !important;
             font-weight: 800 !important;
-            letter-spacing: 0.03em;
+            letter-spacing: 0.02em;
             background: linear-gradient(180deg, #EEEEEE 20%, #FFE066 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            text-shadow: 0 4px 15px rgba(0,0,0,0.7);
-            margin-bottom: 0.5rem;
-            line-height: 1.2;
+            text-shadow: 0 3px 12px rgba(0,0,0,0.8);
+            margin-bottom: 0.4rem;
+            line-height: 1.3;
         }
         
         .subtitle-text {
             color: #D0D8EC !important;
-            font-size: 1.0rem;
+            font-size: 0.88rem;
             font-weight: 400 !important;
-            letter-spacing: 0.03em;
-            margin-bottom: 1.8rem;
+            letter-spacing: 0.02em;
+            margin-bottom: 1.2rem;
             text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+            padding: 0 0.5rem;
+            line-height: 1.4;
+        }
+
+        /* モード選択のセクションタイトル（どちらにしますか？） */
+        .choice-title {
+            text-align: center;
+            font-family: 'Shippori Mincho', serif !important;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #FFE066 !important;
+            margin: 1.2rem 0 0.8rem 0;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.9);
+            letter-spacing: 0.05em;
         }
 
         /* モダンなステップ進捗バー */
         .step-container {
             display: flex;
             justify-content: space-between;
-            gap: 10px;
-            margin-bottom: 2rem;
+            gap: 8px;
+            margin-bottom: 1.5rem;
             background: rgba(15, 20, 35, 0.7);
-            padding: 10px;
-            border-radius: 14px;
+            padding: 8px;
+            border-radius: 12px;
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
         .step-box {
             flex: 1;
             text-align: center;
-            padding: 8px;
-            border-radius: 10px;
-            font-size: 0.85rem;
+            padding: 6px 4px;
+            border-radius: 8px;
+            font-size: 0.78rem;
             font-weight: 700;
             color: #8892B0;
             background: rgba(255, 255, 255, 0.03);
@@ -145,7 +159,7 @@ if img_base64:
             background: linear-gradient(135deg, rgba(255,215,0,0.25), rgba(255,140,0,0.25));
             color: #FFE066;
             border: 1px solid rgba(255, 215, 0, 0.6);
-            box-shadow: 0 0 12px rgba(255, 215, 0, 0.3);
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
         }
 
         /* 一般テキストの視認性確保 */
@@ -159,26 +173,27 @@ if img_base64:
         .upload-card-container {
             background: linear-gradient(135deg, rgba(30, 35, 60, 0.85) 0%, rgba(15, 20, 35, 0.9) 100%);
             border: 2px dashed rgba(255, 215, 0, 0.6);
-            border-radius: 16px;
-            padding: 2rem;
+            border-radius: 14px;
+            padding: 1.5rem 1rem;
             text-align: center;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.2rem;
             box-shadow: 0 8px 32px rgba(0,0,0,0.4);
         }
 
-        /* モード選択ボタンの背景を40%透過に設定 */
+        /* モード選択ボタンの背景透過・デザイン */
         div.stButton > button:nth-child(1),
         div.stButton > button:nth-child(2) {
-            background-color: rgba(255, 255, 255, 0.4) !important;
-            border: 1px solid rgba(255, 255, 255, 0.6) !important;
+            background-color: rgba(255, 255, 255, 0.35) !important;
+            border: 1px solid rgba(255, 255, 255, 0.5) !important;
+            font-weight: bold !important;
         }
 
-        /* 動画サイズを3/4（75%）にしてセンター配置するカスタムクラス */
+        /* 動画サイズをスマホで綺麗に収まる75%＆センター配置 */
         .video-container-34 {
-            max-width: 75% !important;
+            max-width: 85% !important;
             margin-left: auto !important;
             margin-right: auto !important;
-            margin-bottom: 1.5rem !important;
+            margin-bottom: 1.2rem !important;
         }
 
         .wx-wood { color: #55FF55 !important; font-weight: bold; }
@@ -193,11 +208,11 @@ if img_base64:
 
 st.markdown('<meta name="google" content="notranslate">', unsafe_allow_html=True)
 
-# ヒーローヘッダー
+# ヒーローヘッダー（タイトルをスマホで綺麗に折り返すHTML構成）
 st.markdown("""
 <div class="hero-header notranslate">
     <div class="hero-badge">✨ AI陰陽心理鑑定 ✨</div>
-    <div class="main-title-text">アイコン個性診断 ＆ 開運鑑定</div>
+    <div class="main-title-text">アイコン個性診断<br>＆ 開運鑑定</div>
     <div class="subtitle-text">✨アイコンから『個性と深層心理』を紐解き、開運アドバイスをお届けします✨</div>
 </div>
 """, unsafe_allow_html=True)
@@ -401,9 +416,10 @@ with st.sidebar:
 # 5. モード選択 & ステップ進捗管理
 # ==========================================
 if st.session_state.mode is None:
-    st.subheader("✨ どちらにしますか？ ✨")
+    # ── 「どちらにしますか？」のセクションタイトルをデザインされた見出しに変更 ──
+    st.markdown('<div class="choice-title">✨ どちらにしますか？ ✨</div>', unsafe_allow_html=True)
     
-    # トップページの動画（3/4サイズ＆センター配置）
+    # トップページの動画（スマホ向けに最適化されたサイズ）
     video_path = "cat_video.mp4"
     if os.path.exists(video_path):
         with open(video_path, "rb") as f:
@@ -411,7 +427,7 @@ if st.session_state.mode is None:
         video_base64 = base64.b64encode(video_bytes).decode()
         video_html = f"""
         <div class="video-container-34">
-            <video width="100%" autoplay muted loop playsinline style="border-radius: 14px; border: 1.5px solid rgba(255, 215, 0, 0.6); box-shadow: 0 8px 25px rgba(0,0,0,0.5);">
+            <video width="100%" autoplay muted loop playsinline style="border-radius: 12px; border: 1.5px solid rgba(255, 215, 0, 0.6); box-shadow: 0 6px 20px rgba(0,0,0,0.5);">
                 <source src="data:video/mp4;base64,{video_base64}" type="video/mp4">
                 お使いのブラウザは動画タグに対応していません。
             </video>
@@ -517,8 +533,8 @@ elif st.session_state.mode == "diagnosis":
         st.subheader("🖼️ SNSアイコンのアップロード")
         st.markdown("""
         <div class="upload-card-container">
-            <h3 style="color: #FFE066; margin-top: 0;">✨ SNSアイコンを👇にUPしてください ✨</h3>
-            <p style="color: #CCCCCC; font-size: 0.95rem; margin-bottom: 1rem;">陰陽心理鑑定で、アイコンの特徴と魅力を解説します！</p>
+            <h3 style="color: #FFE066; margin-top: 0; font-size: 1.1rem;">✨ SNSアイコンを👇にUPしてください ✨</h3>
+            <p style="color: #CCCCCC; font-size: 0.85rem; margin-bottom: 0.5rem;">陰陽心理鑑定で、アイコンの特徴と魅力を解説します！</p>
         </div>
         """, unsafe_allow_html=True)
 
@@ -578,7 +594,7 @@ elif st.session_state.mode == "diagnosis":
 
                     status_holder = st.empty()
                     with status_holder.container():
-                        # ── 鑑定中の静止画を動画（cat_video3.mp4）の自動＆ループ再生に差し替え ──
+                        # 鑑定中のローディング動画（cat_video3.mp4）
                         loading_video_path = "cat_video3.mp4"
                         if os.path.exists(loading_video_path):
                             with open(loading_video_path, "rb") as f:
@@ -586,7 +602,7 @@ elif st.session_state.mode == "diagnosis":
                             l_video_base64 = base64.b64encode(l_video_bytes).decode()
                             l_video_html = f"""
                             <div class="video-container-34">
-                                <video width="100%" autoplay muted loop playsinline style="border-radius: 14px; border: 1.5px solid rgba(255, 215, 0, 0.6); box-shadow: 0 8px 25px rgba(0,0,0,0.5);">
+                                <video width="100%" autoplay muted loop playsinline style="border-radius: 12px; border: 1.5px solid rgba(255, 215, 0, 0.6); box-shadow: 0 6px 20px rgba(0,0,0,0.5);">
                                     <source src="data:video/mp4;base64,{l_video_base64}" type="video/mp4">
                                     お使いのブラウザは動画タグに対応していません。
                                 </video>
@@ -600,7 +616,7 @@ elif st.session_state.mode == "diagnosis":
                             prompt = f"""
 あなたは人間観察に長けた、非常に知的な陰陽心理鑑定士です。
 提供された「SNSアイコン画像」の細かい視覚的特徴（被写体、服装、背景、構図、色合い、ギャップなど）を巧みに分析し、ユーザーのパーソナリティを読み解いてください。
-※文章中で太字（**）などのマークダウン装飾記号は使わないでください。
+※文章中で太字（**）などのマークダウン装飾記号は絶対に使わないでください。
 
 以下のフォーマットを「必ず」厳守して出力してください。
 
@@ -720,20 +736,20 @@ elif st.session_state.mode == "diagnosis":
                 line_str = line.strip()
                 clean_line = re.sub(r'\*+', '', line_str).strip()
                 clean_line = format_wuxing_color(clean_line)
-                if clean_line.startswith("■ 診断結果："): formatted_html_body += f"<div style='color:#FFD700; font-size:1.35rem; font-weight:bold; margin-top:1.2rem; margin-bottom:0.6rem; border-bottom:1px solid #FFD700; padding-bottom:0.3rem;'>{clean_line}</div>"
-                elif clean_line.startswith("■ 3つのハッシュタグ:"): formatted_html_body += f"<div style='color:#FFE066; font-size:1.1rem; font-weight:bold; margin-bottom:0.6rem;'>{clean_line}</div>"
+                if clean_line.startswith("■ 診断結果："): formatted_html_body += f"<div style='color:#FFD700; font-size:1.30rem; font-weight:bold; margin-top:1.2rem; margin-bottom:0.6rem; border-bottom:1px solid #FFD700; padding-bottom:0.3rem;'>{clean_line}</div>"
+                elif clean_line.startswith("■ 3つのハッシュタグ:"): formatted_html_body += f"<div style='color:#FFE066; font-size:1.05rem; font-weight:bold; margin-bottom:0.6rem;'>{clean_line}</div>"
                 elif clean_line.startswith("■ パラメータ:"): continue
-                elif clean_line.startswith("1. "): formatted_html_body += f"<div style='color:#4EAEFF; font-size:1.18rem; font-weight:bold; margin-top:1.2rem; margin-bottom:0.4rem;'>{clean_line}</div>"
-                elif clean_line.startswith("2. "): formatted_html_body += f"<div style='color:#40E0D0; font-size:1.18rem; font-weight:bold; margin-top:1.2rem; margin-bottom:0.4rem;'>{clean_line}</div>"
-                elif clean_line.startswith("3. "): formatted_html_body += f"<div style='color:#FF8C00; font-size:1.18rem; font-weight:bold; margin-top:1.2rem; margin-bottom:0.4rem;'>{clean_line}</div>"
-                elif clean_line.startswith("🔮 本日のワンポイント開運鑑定"): formatted_html_body += f"<div style='color:#E0B0FF; font-size:1.3rem; font-weight:bold; margin-top:1.4rem; margin-bottom:0.6rem; border-bottom:1px solid #E0B0FF; padding-bottom:0.3rem;'>{clean_line}</div>"
-                elif clean_line.startswith("・"): formatted_html_body += f"<div style='color:#FFF3C4; font-size:1.02rem; line-height:1.7; margin-bottom:0.3rem; padding-left:0.5rem;'>{clean_line}</div>"
-                elif clean_line == "": formatted_html_body += "<div style='height:0.6rem;'></div>"
-                else: formatted_html_body += f"<div style='color:#FFFFFF; font-size:1.02rem; line-height:1.8; margin-bottom:0.4rem;'>{clean_line}</div>"
+                elif clean_line.startswith("1. "): formatted_html_body += f"<div style='color:#4EAEFF; font-size:1.12rem; font-weight:bold; margin-top:1.2rem; margin-bottom:0.4rem;'>{clean_line}</div>"
+                elif clean_line.startswith("2. "): formatted_html_body += f"<div style='color:#40E0D0; font-size:1.12rem; font-weight:bold; margin-top:1.2rem; margin-bottom:0.4rem;'>{clean_line}</div>"
+                elif clean_line.startswith("3. "): formatted_html_body += f"<div style='color:#FF8C00; font-size:1.12rem; font-weight:bold; margin-top:1.2rem; margin-bottom:0.4rem;'>{clean_line}</div>"
+                elif clean_line.startswith("🔮 本日のワンポイント開運鑑定"): formatted_html_body += f"<div style='color:#E0B0FF; font-size:1.2rem; font-weight:bold; margin-top:1.4rem; margin-bottom:0.6rem; border-bottom:1px solid #E0B0FF; padding-bottom:0.3rem;'>{clean_line}</div>"
+                elif clean_line.startswith("・"): formatted_html_body += f"<div style='color:#FFF3C4; font-size:0.98rem; line-height:1.6; margin-bottom:0.3rem; padding-left:0.5rem;'>{clean_line}</div>"
+                elif clean_line == "": formatted_html_body += "<div style='height:0.5rem;'></div>"
+                else: formatted_html_body += f"<div style='color:#FFFFFF; font-size:0.98rem; line-height:1.7; margin-bottom:0.4rem;'>{clean_line}</div>"
 
             card_html = f"""
-            <div class="notranslate" style="background: rgba(10, 15, 25, 0.75); backdrop-filter: blur(8px); border: 1.5px solid rgba(212, 175, 55, 0.8); border-radius: 14px; padding: 1.8rem; margin-top: 1.2rem; margin-bottom: 2.0rem;">
-                <h3 style="color:#FFE066; text-align:center; margin-top:0;">📖 鑑定結果の詳細</h3>
+            <div class="notranslate" style="background: rgba(10, 15, 25, 0.75); backdrop-filter: blur(8px); border: 1.5px solid rgba(212, 175, 55, 0.8); border-radius: 14px; padding: 1.5rem; margin-top: 1.2rem; margin-bottom: 2.0rem;">
+                <h3 style="color:#FFE066; text-align:center; margin-top:0; font-size: 1.2rem;">📖 鑑定結果の詳細</h3>
                 {formatted_html_body}
             </div>
             """
