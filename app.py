@@ -499,11 +499,11 @@ elif st.session_state.mode == "omikuji_only":
                     omikuji_response = None
                     for m in models_to_try:
                         try:
-                            omikuji_response = client.models.generate_content(model=m, contents=[omikuji_prompt])
+                            omikuji_response = client.models.generate_content(model=m, contents=omikuji_prompt)
                             break
                         except Exception:
                             try:
-                                omikuji_response = client.models.generate_content(model=f"models/{m}", contents=[omikuji_prompt])
+                                omikuji_response = client.models.generate_content(model=f"models/{m}", contents=omikuji_prompt)
                                 break
                             except Exception:
                                 continue
@@ -836,11 +836,11 @@ elif st.session_state.mode == "diagnosis":
                             omikuji_response = None
                             for m in models_to_try:
                                 try:
-                                    omikuji_response = client.models.generate_content(model=m, contents=[omikuji_prompt])
+                                    omikuji_response = client.models.generate_content(model=m, contents=omikuji_prompt)
                                     break
                                 except Exception:
                                     try:
-                                        omikuji_response = client.models.generate_content(model=f"models/{m}", contents=[omikuji_prompt])
+                                        omikuji_response = client.models.generate_content(model=f"models/{m}", contents=omikuji_prompt)
                                         break
                                     except Exception:
                                         continue
