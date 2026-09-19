@@ -832,7 +832,7 @@ elif st.session_state.mode == "diagnosis":
 （クスッと笑える親しみやすくユーモアのあるアドバイス）
 """
                             client = genai.Client(api_key=st.session_state.api_key)
-                            models_to_try = ['gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-2.5-pro']
+                            models_to_try = ['gemini-3.6-flash', 'gemini-1.5-flash', 'gemini-2.5-pro']
                             omikuji_response = None
                             for m in models_to_try:
                                 try:
