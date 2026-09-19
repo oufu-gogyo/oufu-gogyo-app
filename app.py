@@ -429,30 +429,30 @@ def generate_carousel_images(user_icon_img, type_name, wuxing_type, tags, params
     return images
 
 def generate_omikuji_card_image(fortune_type, omikuji_raw_text):
-    # スマホ可読性重視の縦長カード型 (1080x1500)
-    card_w, card_h = 1080, 1500
+    # 見切れ防止のため縦幅を1700pxに拡大
+    card_w, card_h = 1080, 1700
     card = Image.new("RGBA", (card_w, card_h), (25, 18, 30, 255))
     draw = ImageDraw.Draw(card)
     
-    # フォントサイズ設定
-    title_font = get_readable_font(38)
-    fortune_font = get_readable_font(72)
-    heading_font = get_readable_font(30)
-    body_font = get_readable_font(24)
+    # フォントサイズを微調整して余白を確保
+    title_font = get_readable_font(36)
+    fortune_font = get_readable_font(68)
+    heading_font = get_readable_font(28)
+    body_font = get_readable_font(23)
     footer_font = get_readable_font(22)
     
     # 枠線描画
     draw.rectangle([20, 20, card_w - 20, card_h - 20], outline=(212, 175, 55), width=5)
     draw.rectangle([30, 30, card_w - 30, card_h - 30], outline=(255, 224, 102), width=2)
-    draw.text((card_w // 2, 65), "― 陰陽開運おみくじ ―", font=title_font, fill=(255, 224, 102), anchor="mm")
+    draw.text((card_w // 2, 60), "― 陰陽開運おみくじ ―", font=title_font, fill=(255, 224, 102), anchor="mm")
     
     # 運勢表示
     fortune_color = (255, 90, 90) if fortune_type in ["超大吉", "大吉"] else ((180, 200, 210) if fortune_type == "凶" else (255, 224, 102))
-    draw.rectangle([card_w // 2 - 180, 100, card_w // 2 + 180, 195], fill=(40, 25, 45), outline=fortune_color, width=4)
-    draw.text((card_w // 2, 147), fortune_type, font=fortune_font, fill=fortune_color, anchor="mm")
+    draw.rectangle([card_w // 2 - 180, 95, card_w // 2 + 180, 185], fill=(40, 25, 45), outline=fortune_color, width=4)
+    draw.text((card_w // 2, 140), fortune_type, font=fortune_font, fill=fortune_color, anchor="mm")
     
     # 本文枠
-    box_top, box_bottom = 215, 1420
+    box_top, box_bottom = 200, 1620
     draw.rectangle([45, box_top, card_w - 45, box_bottom], fill=(18, 12, 24), outline=(100, 80, 120), width=2)
     
     lines = omikuji_raw_text.split('\n')
@@ -462,20 +462,19 @@ def generate_omikuji_card_image(fortune_type, omikuji_raw_text):
         clean_line = re.sub(r'\*+', '', line).strip()
         if not clean_line or clean_line.startswith("---") or clean_line.startswith("==="): continue
         
-        # 文章レイアウトをセンター配置に変更
         if "【" in clean_line and "】" in clean_line:
-            y_offset += 10
+            y_offset += 12
             draw.text((card_w // 2, y_offset), clean_line, font=heading_font, fill=(255, 220, 100), anchor="mm")
-            y_offset += 36
+            y_offset += 32
         else:
             wrapped = wrap_text(clean_line, body_font, 950)
             for w in wrapped:
                 if y_offset > box_bottom - 25: break
                 draw.text((card_w // 2, y_offset), w, font=body_font, fill=(240, 240, 250), anchor="mm")
-                y_offset += 30
+                y_offset += 28
             y_offset += 4
 
-    draw.text((card_w // 2, 1455), "--- 陰陽SNSアイコン診断 & 開運おみくじ ---", font=footer_font, fill=(160, 170, 190), anchor="mm")
+    draw.text((card_w // 2, 1655), "--- 陰陽SNSアイコン診断 & 開運おみくじ ---", font=footer_font, fill=(160, 170, 190), anchor="mm")
     return card
 
 # ==========================================
@@ -836,7 +835,7 @@ elif st.session_state.mode == "diagnosis":
             
             if st.button("☯️ おみくじを引く！ ☯️", type="primary", use_container_width=True, key="omikuji_btn_diag"):
                 active_key = get_api_key()
-                if not active_key or active_key == "AQ.Ab8RN6J9O_fiJEuy5ZWVFIEGlxzw_DwQ5pfA6w5eUoCvNcJASQ":
+                if not active_key or active_key == "YOUR_GEMINI_API_KEY_HERE":
                     st.error("コード内の DEFAULT_GEMINI_API_KEY にAPI Keyを設定してください。")
                 else:
                     fortune_list = ["超大吉", "大吉", "中吉", "小吉", "吉", "末吉", "凶"]
@@ -845,7 +844,7 @@ elif st.session_state.mode == "diagnosis":
                     
                     status_holder_diag = st.empty()
                     with status_holder_diag.container():
-                        render_video("cat_video4.mp4")
+                        render_video("cat_video2.mp4")
                         with st.spinner("黒猫がみくじ筒をシャカシャカ振り振り、おみくじデータを錬成中..."):
                             try:
                                 omikuji_prompt = f"""
