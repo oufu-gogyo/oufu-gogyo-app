@@ -96,7 +96,6 @@ if img_base64:
             box-shadow: 0 0 12px rgba(255, 215, 0, 0.2);
         }
         
-        /* スマホ画面に合わせてタイトルサイズと改行を美しく調整 */
         .main-title-text {
             font-family: 'Shippori Mincho', serif !important;
             font-size: 1.85rem !important;
@@ -121,7 +120,6 @@ if img_base64:
             line-height: 1.4;
         }
 
-        /* モード選択のセクションタイトル（どちらにしますか？） */
         .choice-title {
             text-align: center;
             font-family: 'Shippori Mincho', serif !important;
@@ -208,7 +206,7 @@ if img_base64:
 
 st.markdown('<meta name="google" content="notranslate">', unsafe_allow_html=True)
 
-# ヒーローヘッダー（タイトルをスマホで綺麗に折り返すHTML構成）
+# ヒーローヘッダー
 st.markdown("""
 <div class="hero-header notranslate">
     <div class="hero-badge">✨ AI陰陽心理鑑定 ✨</div>
@@ -452,7 +450,7 @@ elif st.session_state.mode == "omikuji_only":
         st.session_state.mode = None
         st.rerun()
     st.write("ボタンを押すと、本日の運勢と開運おみくじトレカが生成されます！")
-    if st.button("☯️ おみくじを引く！ ☯️", type="primary", use_container_width=True):
+    if st.button("☯️ おみくじを引く！ ☯️", type="primary", use_container_width=True, key="omikuji_btn_single"):
         if not st.session_state.api_key:
             st.error("サイドバーで Gemini API Key を入力してください。")
         else:
@@ -792,7 +790,7 @@ elif st.session_state.mode == "diagnosis":
                             st.session_state.omikuji_card_image = generate_omikuji_card_image(selected_fortune, omikuji_response.text)
                         except Exception as e: st.error(f"おみくじ中にエラーが発生しました: {e}")
 
-            # ── 修正：おみくじ結果が正しく描画されるように外側に配置 ──
-            if st.session_state.omikuji_text and st.session_state.omikuji_card_image:
-                st.success("⛩️ 今日のおみくじ結果がでました！ ⛩️")
-                st.image(st.session_state.omikuji_card_image, use_container_width=True)
+    # ── 鑑定結果ページのおみくじ表示エリア ──
+    if st.session_state.mode == "diagnosis" and st.session_state.result_text and st.session_state.omikuji_text and st.session_state.omikuji_card_image:
+        st.success("⛩️ 今日のおみくじ結果がでました！ ⛩️")
+        st.image(st.session_state.omikuji_card_image, use_container_width=True)
