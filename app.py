@@ -14,7 +14,7 @@ import google.generativeai as genai
 # 0. API Keyの固定設定（テスト用）
 # ==========================================
 # ここにご自身のGemini API Keyを入力してください
-DEFAULT_GEMINI_API_KEY = "AQ.Ab8RN6J9O_fiJEuy5ZWVFIEGlxzw_DwQ5pfA6w5eUoCvNcJASQ"
+DEFAULT_GEMINI_API_KEY = "YOUR_GEMINI_API_KEY_HERE"
 
 # ==========================================
 # 1. ページ基本設定 & Session State
