@@ -9,12 +9,16 @@ import zipfile
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 import streamlit as st
 import google.generativeai as genai
+from dotenv import load_dotenv
 
 # ==========================================
-# 0. API Keyの固定設定（テスト用）
+# 0. 環境変数（.env）の読み込み
 # ==========================================
-# ここにご自身のGemini API Keyを入力してください
-DEFAULT_GEMINI_API_KEY = "YOUR_GEMINI_API_KEY_HERE"
+# .env ファイルから環境変数をロード
+load_dotenv()
+
+# 環境変数 GEMINI_API_KEY を取得（設定されていない場合は空文字）
+ENV_GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 
 # ==========================================
 # 1. ページ基本設定 & Session State
@@ -38,10 +42,10 @@ if "omikuji_result_type" not in st.session_state:
 if "omikuji_card_image" not in st.session_state:
     st.session_state.omikuji_card_image = None
 if "api_key" not in st.session_state:
-    st.session_state.api_key = DEFAULT_GEMINI_API_KEY
+    st.session_state.api_key = ENV_GEMINI_API_KEY
 
 def get_api_key():
-    return st.session_state.api_key if st.session_state.api_key else DEFAULT_GEMINI_API_KEY
+    return st.session_state.api_key if st.session_state.api_key else ENV_GEMINI_API_KEY
 
 # ==========================================
 # 2. 背景画像（bg.jpg）＆最新トレンドデザイン設定
@@ -489,7 +493,7 @@ with st.sidebar:
 # 5. モード選択 & ステップ進捗管理
 # ==========================================
 if st.session_state.mode is None:
-    st.markdown('<div class="choice-title">✨ どちらにしますニャ？ ✨</div>', unsafe_allow_html=True)
+    st.markdown('<div class="choice-title">✨ どちらニャ？ ✨</div>', unsafe_allow_html=True)
     
     render_video("cat_video.mp4")
 
@@ -505,7 +509,7 @@ if st.session_state.mode is None:
             st.rerun()
 
 elif st.session_state.mode == "omikuji_only":
-    st.markdown('<div class="omikuji-heading">⛩️ 今日の開運おみくじ ⛩️</div>', unsafe_allow_html=True)
+    st.markdown('<div class="omikuji-heading">⛩️ 開運おみくじ ⛩️</div>', unsafe_allow_html=True)
     if st.button("⬅️ 最初に戻る", use_container_width=True):
         st.session_state.mode = None
         st.session_state.omikuji_text = None
@@ -513,10 +517,10 @@ elif st.session_state.mode == "omikuji_only":
         st.rerun()
         
     st.markdown('<p class="center-msg">ボタンを押すと、本日の運勢と開運おみくじが生成されます！</p>', unsafe_allow_html=True)
-    if st.button("☯️ おみくじを引く！ ☯️", type="primary", use_container_width=True, key="omikuji_btn_single"):
+    if st.button("☯️ おみくじを引く ☯️", type="primary", use_container_width=True, key="omikuji_btn_single"):
         active_key = get_api_key()
-        if not active_key or active_key == "YOUR_GEMINI_API_KEY_HERE":
-            st.error("コード内の DEFAULT_GEMINI_API_KEY にAPI Keyを設定してください。")
+        if not active_key:
+            st.error(".env ファイルに GEMINI_API_KEY を設定するか、サイドバーから API Key を入力してください。")
         else:
             fortune_list = ["超大吉", "大吉", "中吉", "小吉", "吉", "末吉", "凶"]
             selected_fortune = random.choice(fortune_list)
@@ -525,7 +529,7 @@ elif st.session_state.mode == "omikuji_only":
             status_holder = st.empty()
             with status_holder.container():
                 render_video("cat_video4.mp4")
-                with st.spinner("黒猫がみくじ筒をシャカシャカ振り振り、おみくじデータを錬成中..."):
+                with st.spinner("黒猫がおみくじ筒をシャカシャカ振り振り、おみくじデータを錬成中..."):
                     try:
                         omikuji_prompt = f"""
 あなたは黒猫の陰陽師です。本格的で読み応えのある神社のおみくじの文章を作成してください。
@@ -561,7 +565,7 @@ elif st.session_state.mode == "omikuji_only":
             status_holder.empty()
 
     if st.session_state.omikuji_text and st.session_state.omikuji_card_image:
-        st.success("⛩️ 今日のおみくじ結果がでました！ ⛩️ (タップで拡大できます)")
+        st.success("⛩️ 今日のおみくじ結果がでました ⛩️ (タップで拡大できます)")
         st.image(st.session_state.omikuji_card_image, use_container_width=True)
 
 elif st.session_state.mode == "diagnosis":
@@ -634,7 +638,7 @@ elif st.session_state.mode == "diagnosis":
     # STEP 2: 鑑定実行 & 結果表示
     # ------------------------------------------
     elif st.session_state.step == 2:
-        st.subheader("🔮 鑑定の準備が整いました！")
+        st.subheader("🔮 鑑定の準備が整いました🔮")
         col_prev, col_start = st.columns([1, 2])
         with col_prev:
             if st.button("⬅️ 前へ戻る", use_container_width=True): st.session_state.step = 1; st.rerun()
@@ -649,8 +653,8 @@ elif st.session_state.mode == "diagnosis":
                 valid_date = None
 
             active_key = get_api_key()
-            if not active_key or active_key == "YOUR_GEMINI_API_KEY_HERE":
-                st.error("コード内の DEFAULT_GEMINI_API_KEY にAPI Keyを設定してください。")
+            if not active_key:
+                st.error(".env ファイルに GEMINI_API_KEY を設定するか、サイドバーから API Key を入力してください。")
             elif valid_date is None:
                 st.error("生年月日のフォーマットが正しくありません。")
             elif "uploaded_file" not in st.session_state or st.session_state.uploaded_file is None:
@@ -835,8 +839,8 @@ elif st.session_state.mode == "diagnosis":
             
             if st.button("☯️ おみくじを引く！ ☯️", type="primary", use_container_width=True, key="omikuji_btn_diag"):
                 active_key = get_api_key()
-                if not active_key or active_key == "YOUR_GEMINI_API_KEY_HERE":
-                    st.error("コード内の DEFAULT_GEMINI_API_KEY にAPI Keyを設定してください。")
+                if not active_key:
+                    st.error(".env ファイルに GEMINI_API_KEY を設定するか、サイドバーから API Key を入力してください。")
                 else:
                     fortune_list = ["超大吉", "大吉", "中吉", "小吉", "吉", "末吉", "凶"]
                     selected_fortune = random.choice(fortune_list)
@@ -844,7 +848,7 @@ elif st.session_state.mode == "diagnosis":
                     
                     status_holder_diag = st.empty()
                     with status_holder_diag.container():
-                        render_video("cat_video2.mp4")
+                        render_video("cat_video4.mp4")
                         with st.spinner("黒猫がみくじ筒をシャカシャカ振り振り、おみくじデータを錬成中..."):
                             try:
                                 omikuji_prompt = f"""
@@ -882,5 +886,5 @@ elif st.session_state.mode == "diagnosis":
 
         # ── おみくじ結果データが存在すれば常に表示されるように独立したブロックで描画 ──
         if st.session_state.omikuji_text and st.session_state.omikuji_card_image:
-            st.success("⛩️ 今日のおみくじ結果がでました！ ⛩️ (タップで拡大できます)")
+            st.success("⛩️ 今日のおみくじ結果がでました ⛩️ (タップで拡大できます)")
             st.image(st.session_state.omikuji_card_image, use_container_width=True)
