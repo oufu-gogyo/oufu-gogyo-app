@@ -484,10 +484,10 @@ def generate_omikuji_card_image(fortune_type, omikuji_raw_text):
 # ==========================================
 # 4. サイドバー
 # ==========================================
-with st.sidebar:
-    st.header("⚙️ 設定")
-    st.session_state.api_key = st.text_input("Gemini API Key (変更する場合のみ入力)", value=st.session_state.api_key, type="password")
-    st.markdown("[Gemini API Keyの取得はこちら](https://aistudio.google.com/app/apikey)")
+#with st.sidebar:
+#    st.header("⚙️ 設定")
+#   st.session_state.api_key = st.text_input("Gemini API Key (変更する場合のみ入力)", value=st.session_state.api_key, type="password")
+#    st.markdown("[Gemini API Keyの取得はこちら](https://aistudio.google.com/app/apikey)")
 
 # ==========================================
 # 5. モード選択 & ステップ進捗管理
