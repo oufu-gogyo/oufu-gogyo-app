@@ -888,3 +888,6 @@ elif st.session_state.mode == "diagnosis":
         if st.session_state.omikuji_text and st.session_state.omikuji_card_image:
             st.success("⛩️ 今日のおみくじ結果がでました ⛩️ (タップで拡大できます)")
             st.image(st.session_state.omikuji_card_image, use_container_width=True)
+            
+            <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1130073416927114"
+     crossorigin="anonymous"></script>
