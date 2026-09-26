@@ -8,7 +8,8 @@ import math
 import zipfile
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 import streamlit as st
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 from dotenv import load_dotenv
 import plotly.graph_objects as go
 
@@ -282,7 +283,7 @@ if img_base64:
             margin-bottom: 1rem !important;
         }
 
-        /* トップ選択ボタンの視認性向上 */
+        /* トップ選択ボタン */
         div.stButton > button[kind="secondary"] {
             background: rgba(20, 26, 45, 0.85) !important;
             color: #FFE066 !important;
@@ -313,7 +314,7 @@ if img_base64:
             color: #FFFFFF !important;
         }
 
-        /* Instagramキャプションエリア（st.code） */
+        /* Instagramキャプションエリア */
         .stCodeBlock, div[data-baseweb="textarea"], pre {
             background-color: #121624 !important;
             border: 1.5px solid rgba(255, 215, 0, 0.6) !important;
@@ -338,7 +339,7 @@ if img_base64:
             max-width: 380px;
             margin: 1.2rem auto;
             padding: 12px;
-            background: rgba(12, 16, 28, 0.85);
+            background: rgba(12, 16, 28, 0.65);
             backdrop-filter: blur(8px);
             border: 2px solid #FFD700;
             border-radius: 14px;
@@ -650,7 +651,7 @@ def render_plotly_radar(params):
     )
     st.plotly_chart(fig, use_container_width=True)
 
-# 🧭 100%完全同期する九星気学（3×3動的方位盤）の描画ロジック
+# 🧭 九星気学（3×3動的方位盤）
 def render_compass_board(good_dirs, bad_dirs, honmei_sei):
     grid_layout = [
         ("南東", "大吉 ⭕" if "南東" in good_dirs else ("凶 ❌" if "南東" in bad_dirs else "―")),
@@ -718,7 +719,7 @@ if st.session_state.mode is None:
             st.rerun()
 
 # ------------------------------------------
-# 🧭 モード3: 今日の吉方位診断（高スケルトン・薄型ブルーカード修正済）
+# 🧭 モード3: 今日の吉方位診断（背景スケルトン極限修正）
 # ------------------------------------------
 elif st.session_state.mode == "direction_only":
     st.markdown('<div class="omikuji-heading">🧭 九星気学・今日の吉方位鑑定 🧭</div>', unsafe_allow_html=True)
@@ -767,15 +768,16 @@ elif st.session_state.mode == "direction_only":
 10行目: 【黒猫陰陽師からのメッセージ】
 11行目: [アドバイス内容]
 """
-                        genai.configure(api_key=active_key)
-                        model = genai.GenerativeModel(GEMINI_MODEL_NAME)
-                        response_dir = model.generate_content(prompt_dir)
+                        client = genai.Client(api_key=active_key)
+                        response_dir = client.models.generate_content(
+                            model=GEMINI_MODEL_NAME,
+                            contents=prompt_dir
+                        )
                         st.session_state.direction_result_text = response_dir.text
                 status_holder_dir.empty()
             except Exception as e:
                 st.error(f"吉方位鑑定中にエラーが発生しました: {e}")
 
-    # 🧭 【修正】背景が透けて見える薄いブルー（スケルトン）カード化
     if st.session_state.direction_result_text:
         valid_date = datetime.date(int(st.session_state.birth_date_str[:4]), int(st.session_state.birth_date_str[4:6]), int(st.session_state.birth_date_str[6:8]))
         honmei_sei = get_honmei_sei(valid_date)
@@ -796,16 +798,16 @@ elif st.session_state.mode == "direction_only":
         bad_text = ", ".join(bad_dirs) if bad_dirs else "特になし（平和）"
 
         st.markdown(f"""
-        <div class="notranslate" style="background: rgba(12, 16, 28, 0.70); backdrop-filter: blur(10px); border: 1.5px solid rgba(212, 175, 55, 0.8); border-radius: 14px; padding: 1.5rem; margin-top: 1.2rem;">
+        <div class="notranslate" style="background: rgba(12, 16, 28, 0.55); backdrop-filter: blur(8px); border: 1.5px solid rgba(212, 175, 55, 0.8); border-radius: 14px; padding: 1.5rem; margin-top: 1.2rem;">
             <h3 style="color:#FFE066; text-align:center; margin-top:0; font-size: 1.3rem; text-shadow: 0 2px 4px #000;">🧭 本日の九星気学 方位盤 🧭</h3>
             <div style="text-align:center; color:#D0D8EC; font-size:0.95rem; margin-bottom:8px; font-weight:bold;">本命星: {honmei_sei}</div>
             {compass_board_html}
             <div style="margin-top: 1.2rem;">
-                <div style="background:rgba(20, 35, 25, 0.65); border-left:4px solid #55FF55; padding:10px 12px; border-radius:6px; margin-bottom:10px; border:1px solid rgba(85,255,85,0.3);">
+                <div style="background:rgba(20, 35, 25, 0.45); border-left:4px solid #55FF55; padding:10px 12px; border-radius:6px; margin-bottom:10px; border:1px solid rgba(85,255,85,0.3);">
                     <b style="color:#FFE066; font-size:1.0rem; text-shadow:0 1px 2px #000;">✨ 本日の最高吉方位：</b>
                     <span style="color:#55FF55; font-size:1.2rem; font-weight:bold; margin-left:6px; text-shadow:0 0 8px rgba(85,255,85,0.6);">{good_text}</span>
                 </div>
-                <div style="background:rgba(35, 20, 25, 0.65); border-left:4px solid #FF6666; padding:10px 12px; border-radius:6px; margin-bottom:16px; border:1px solid rgba(255,102,102,0.3);">
+                <div style="background:rgba(35, 20, 25, 0.45); border-left:4px solid #FF6666; padding:10px 12px; border-radius:6px; margin-bottom:16px; border:1px solid rgba(255,102,102,0.3);">
                     <b style="color:#FFE066; font-size:1.0rem; text-shadow:0 1px 2px #000;">⚠️ 本日の警戒凶方位：</b>
                     <span style="color:#FF6666; font-size:1.1rem; font-weight:bold; margin-left:6px; text-shadow:0 0 8px rgba(255,102,102,0.6);">{bad_text}</span>
                 </div>
@@ -820,19 +822,19 @@ elif st.session_state.mode == "direction_only":
                 parts = line.split(":", 1)
                 title = parts[0]
                 body = parts[1] if len(parts) > 1 else ""
-                # 🎨【ポイント】色ではなく背景透過率を調整 (rgba: 0.82 → 0.45)
+                # 🎨 背景をさらに透かせるように透過度を 0.18 に調整
                 st.markdown(f"""
-                <div style="background: rgba(12, 16, 28, 0.45); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid rgba(255, 215, 0, 0.4); padding: 12px 16px; margin-bottom: 12px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
-                    <div style="color:#FFE066; font-size:1.05rem; font-weight:bold; margin-bottom:6px; text-shadow:0 1px 3px rgba(0,0,0,0.9);">{title}</div>
-                    <div style="color:#FFFFFF; font-size:0.95rem; line-height:1.65; font-weight:500; text-shadow:0 1px 3px rgba(0,0,0,0.9);">{body}</div>
+                <div style="background: rgba(12, 16, 28, 0.18); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); border: 1px solid rgba(255, 215, 0, 0.5); padding: 12px 16px; margin-bottom: 12px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                    <div style="color:#FFE066; font-size:1.05rem; font-weight:bold; margin-bottom:6px; text-shadow:0 2px 4px rgba(0,0,0,0.95);">{title}</div>
+                    <div style="color:#FFFFFF; font-size:0.95rem; line-height:1.65; font-weight:600; text-shadow:0 2px 4px rgba(0,0,0,0.95);">{body}</div>
                 </div>
                 """, unsafe_allow_html=True)
             elif "【黒猫陰陽師" in line or line.startswith("【"):
                 continue
             elif not line.startswith("吉方位:") and not line.startswith("凶方位:"):
                 st.markdown(f"""
-                <div style="background: rgba(12, 16, 28, 0.45); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-left: 3px solid #E0B0FF; border-top: 1px solid rgba(224,176,255,0.3); border-right: 1px solid rgba(224,176,255,0.3); border-bottom: 1px solid rgba(224,176,255,0.3); padding: 10px 14px; margin-bottom: 10px; border-radius: 6px;">
-                    <div style="color:#FFFFFF; font-size:0.95rem; line-height:1.65; font-weight:500; text-shadow:0 1px 3px rgba(0,0,0,0.9);">{line}</div>
+                <div style="background: rgba(12, 16, 28, 0.18); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); border-left: 3px solid #E0B0FF; border-top: 1px solid rgba(224,176,255,0.3); border-right: 1px solid rgba(224,176,255,0.3); border-bottom: 1px solid rgba(224,176,255,0.3); padding: 10px 14px; margin-bottom: 10px; border-radius: 6px;">
+                    <div style="color:#FFFFFF; font-size:0.95rem; line-height:1.65; font-weight:600; text-shadow:0 2px 4px rgba(0,0,0,0.95);">{line}</div>
                 </div>
                 """, unsafe_allow_html=True)
 
@@ -886,9 +888,11 @@ elif st.session_state.mode == "omikuji_only":
 【黒猫陰陽師からの裏ひとこと】
 （クスッと笑える親しみやすくユーモアのあるアドバイス）
 """
-                        genai.configure(api_key=active_key)
-                        model = genai.GenerativeModel(GEMINI_MODEL_NAME)
-                        omikuji_response = model.generate_content(omikuji_prompt)
+                        client = genai.Client(api_key=active_key)
+                        omikuji_response = client.models.generate_content(
+                            model=GEMINI_MODEL_NAME,
+                            contents=omikuji_prompt
+                        )
                         
                         st.session_state.omikuji_text = omikuji_response.text
                         st.session_state.omikuji_card_image = generate_omikuji_card_image(selected_fortune, omikuji_response.text)
@@ -1055,8 +1059,7 @@ elif st.session_state.mode == "diagnosis":
 🔮 本日のワンポイント開運鑑定（本命星: {wuxing_info['honmei_sei']} / 五行: {wuxing_info['user_wuxing']}）
 [誕生日({valid_date})の九星「{wuxing_info['honmei_sei']}」と本日の気質から、本日の吉方位（例: 南東等）と今日を最高にする開運アドバイスを記述]
 """
-                            genai.configure(api_key=active_key)
-                            model = genai.GenerativeModel(GEMINI_MODEL_NAME)
+                            client = genai.Client(api_key=active_key)
                             
                             img_byte_arr = io.BytesIO()
                             img_format = image.format if image.format and image.format.upper() in ["PNG", "JPEG", "JPG"] else "JPEG"
@@ -1065,12 +1068,13 @@ elif st.session_state.mode == "diagnosis":
                             mime_type = f"image/{img_format.lower()}"
                             if mime_type == "image/jpg": mime_type = "image/jpeg"
 
-                            image_part = {
-                                "mime_type": mime_type,
-                                "data": img_bytes
-                            }
-
-                            response = model.generate_content([prompt, image_part])
+                            response = client.models.generate_content(
+                                model=GEMINI_MODEL_NAME,
+                                contents=[
+                                    prompt,
+                                    types.Part.from_bytes(data=img_bytes, mime_type=mime_type)
+                                ]
+                            )
 
                             result_text = response.text
                             st.session_state.result_text = result_text
@@ -1133,7 +1137,7 @@ elif st.session_state.mode == "diagnosis":
             
             st.download_button(label="📦 4枚の画像をまとめて保存する（ZIP）", data=buf.getvalue(), file_name="diagnosis_4slides.zip", mime="application/zip", use_container_width=True)
             
-            # Instagram投稿用テキストコピペエリア
+            # Instagram投稿用テキストエリア
             st.markdown("### 📲 Instagram投稿用キャプション")
             st.caption("以下のテキストをコピーして、InstagramやSNSの投稿にそのままお使いいただけます！")
             
@@ -1218,9 +1222,11 @@ elif st.session_state.mode == "diagnosis":
 【黒猫陰陽師からの裏ひとこと】
 （クスッと笑える親しみやすくユーモアのあるアドバイス）
 """
-                                genai.configure(api_key=active_key)
-                                model = genai.GenerativeModel(GEMINI_MODEL_NAME)
-                                omikuji_response = model.generate_content(omikuji_prompt)
+                                client = genai.Client(api_key=active_key)
+                                omikuji_response = client.models.generate_content(
+                                    model=GEMINI_MODEL_NAME,
+                                    contents=omikuji_prompt
+                                )
 
                                 st.session_state.omikuji_text = omikuji_response.text
                                 st.session_state.omikuji_card_image = generate_omikuji_card_image(selected_fortune, omikuji_response.text)
