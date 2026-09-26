@@ -25,19 +25,12 @@ ENV_GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 # ==========================================
 st.set_page_config(page_title="SNSアイコン個性診断＆開運鑑定", page_icon="☯️", layout="centered")
 
-import streamlit as st
-
-# AdSenseの所有権確認用コードを埋め込み
-st.html(
-    """
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-11300734169227114"
+# AdSenseの所有権確認用コード（重複importを整理し、st.markdownに変更）
+adsense_code = """
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-11300734169227114"
      crossorigin="anonymous"></script>
-    """
-)
-
-# ここから下にアプリのコードを書く
-
-
+"""
+st.markdown(adsense_code, unsafe_allow_html=True)
 
 if "mode" not in st.session_state:
     st.session_state.mode = None
