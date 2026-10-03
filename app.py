@@ -225,6 +225,44 @@ if img_base64:
             margin-bottom: 0.5rem;
         }
 
+        .step-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 1.5rem;
+            background: rgba(15, 20, 35, 0.7);
+            padding: 8px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .step-box {
+            flex: 1;
+            text-align: center;
+            padding: 6px 4px;
+            border-radius: 8px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #8892B0;
+            background: rgba(255, 255, 255, 0.03);
+            transition: all 0.3s ease;
+        }
+        .step-box.active {
+            background: linear-gradient(135deg, rgba(255,215,0,0.25), rgba(255,140,0,0.25));
+            color: #FFE066;
+            border: 1px solid rgba(255, 215, 0, 0.6);
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+        }
+
+        .upload-card-container {
+            background: linear-gradient(135deg, rgba(30, 35, 60, 0.85) 0%, rgba(15, 20, 35, 0.9) 100%);
+            border: 2px dashed rgba(255, 215, 0, 0.6);
+            border-radius: 14px;
+            padding: 1.5rem 1rem;
+            text-align: center;
+            margin-bottom: 1.2rem;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+        }
+
         .stApp h1, .stApp h2, .stApp h3, .stApp p, .stApp span {
             color: #FFFFFF !important;
             text-shadow: 0px 2px 6px rgba(0, 0, 0, 0.9);
@@ -238,7 +276,6 @@ if img_base64:
             margin-bottom: 1.2rem !important;
         }
 
-        /* すりガラス（透け感）デザイン */
         .glass-card-box {
             background: rgba(20, 26, 40, 0.55) !important;
             backdrop-filter: blur(10px) !important;
@@ -250,7 +287,6 @@ if img_base64:
             box-shadow: 0 6px 20px rgba(0,0,0,0.5) !important;
         }
 
-        /* 四柱推命 命式テーブルデザイン */
         .meishiki-table {
             width: 100%;
             border-collapse: collapse;
@@ -294,7 +330,6 @@ if img_base64:
             border-radius: 10px !important;
         }
 
-        /* 🧭 九星気学 3x3 方位盤スタイル（添付コード準拠） */
         .compass-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -324,6 +359,17 @@ if img_base64:
         .status-good { color: #55FF55; text-shadow: 0 0 6px rgba(85,255,85,0.8); }
         .status-bad { color: #FF6666; text-shadow: 0 0 6px rgba(255,102,102,0.8); }
         .status-center { color: #FFE066; }
+        
+        .wx-wood { color: #55FF55 !important; font-weight: bold; }
+        .wx-fire { color: #FF6666 !important; font-weight: bold; }
+        .wx-earth { color: #FFDD44 !important; font-weight: bold; }
+        .wx-metal { color: #E0E0E0 !important; font-weight: bold; }
+        .wx-water { color: #66CCFF !important; font-weight: bold; }
+
+        .center-msg {
+            text-align: center !important;
+            margin-bottom: 1rem !important;
+        }
         </style>
     """
     css_code = css_template.replace('__IMAGE_DATA__', img_base64)
@@ -355,13 +401,14 @@ def render_video(video_filename="cat_video2.mp4"):
         st.markdown(v_html, unsafe_allow_html=True)
 
 # ==========================================
-# 3. 万年暦・五行・九星・四柱推命計算エンジン
+# 3. 万年暦・五行・九星・四柱推命計算エンジン & 画像処理
 # ==========================================
 TIAN_GAN = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"]
 DI_ZHI = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"]
 
 GAN_WU_XING = {"甲": "木", "乙": "木", "丙": "火", "丁": "火", "戊": "土", "己": "土", "庚": "金", "辛": "金", "壬": "水", "癸": "水"}
 ZHI_WU_XING = {"子": "水", "丑": "土", "寅": "木", "卯": "木", "辰": "土", "巳": "火", "午": "火", "未": "土", "申": "金", "酉": "金", "戌": "土", "亥": "水"}
+WU_XING_CLASS = {"木": "wx-wood", "火": "wx-fire", "土": "wx-earth", "金": "wx-metal", "水": "wx-water"}
 
 ZHI_ZOUGAN_HONKI = {
     "子": "癸", "丑": "己", "寅": "甲", "卯": "乙",
@@ -375,7 +422,6 @@ STAR_ELEMENTS = {
     "五黄土星": "土", "六白金星": "金", "七赤金星": "金", "八白土星": "土", "九紫火星": "火"
 }
 
-# 五行の相性定義（相生関係：添付コードより）
 SOSEI_MAP = {
     "木": ["水", "火"],
     "火": ["木", "土"],
@@ -419,6 +465,198 @@ def colorize_lucky_colors(text: str) -> str:
             text = pattern.sub(replacement, text)
     return text
 
+def format_wuxing_color(text: str) -> str:
+    for wx, cls_name in WU_XING_CLASS.items():
+        text = text.replace(f"「{wx}」", f"「<span class='{cls_name}'>{wx}</span>」")
+        text = text.replace(f"五行タイプ: {wx}", f"五行タイプ: <span class='{cls_name}'>{wx}</span>")
+    return text
+
+def get_day_gan(dt: datetime.date) -> str:
+    base_date = datetime.date(1900, 1, 1)
+    return TIAN_GAN[(dt - base_date).days % 10]
+
+def calculate_guxing_info(birth_date: datetime.date, target_date: datetime.date):
+    user_gan = get_day_gan(birth_date)
+    today_gan = get_day_gan(target_date)
+    return {"user_gan": user_gan, "user_wuxing": GAN_WU_XING[user_gan], "today_gan": today_gan, "today_wuxing": GAN_WU_XING[today_gan]}
+
+def get_readable_font(size):
+    font_candidates = [
+        "/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc",
+        "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+        "/usr/share/fonts/truetype/noto/NotoSansCJK-Bold.ttc",
+        "/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc",
+        "C:\\Windows\\Fonts\\meiryob.ttc",
+        "C:\\Windows\\Fonts\\meiryo.ttc",
+        "C:\\Windows\\Fonts\\msgothic.ttc",
+        "/System/Library/Fonts/Hiragino Sans GB.ttc"
+    ]
+    for font_path in font_candidates:
+        if os.path.exists(font_path):
+            try:
+                return ImageFont.truetype(font_path, size)
+            except:
+                continue
+    return ImageFont.load_default()
+
+def wrap_text(text, font, max_width):
+    lines, current_line = [], ""
+    for char in text:
+        w = font.getlength(current_line + char) if hasattr(font, 'getlength') else font.getbbox(current_line + char)[2]
+        if w <= max_width: current_line += char
+        else: lines.append(current_line); current_line = char
+    if current_line: lines.append(current_line)
+    return lines
+
+def create_base_card():
+    card = Image.new("RGBA", (1080, 1080), (12, 16, 28, 255))
+    draw = ImageDraw.Draw(card)
+    for y in range(1080):
+        alpha_val = int(20 + 15 * math.sin(y / 60.0))
+        draw.line([(0, y), (1080, y)], fill=(35, 40, 70, alpha_val))
+    draw.rectangle([25, 25, 1055, 1055], outline=(212, 175, 55), width=6)
+    draw.rectangle([40, 40, 1040, 1040], outline=(255, 224, 102), width=2)
+    corner_len = 50
+    for cx, cy in [(40, 40), (1040, 40), (40, 1040), (1040, 1040)]:
+        dx, dy = (1 if cx == 40 else -1), (1 if cy == 40 else -1)
+        draw.line([(cx, cy), (cx + corner_len * dx, cy)], fill=(255, 235, 120), width=5)
+        draw.line([(cx, cy), (cx, cy + corner_len * dy)], fill=(255, 235, 120), width=5)
+    return card, draw
+
+def draw_radar_chart(draw, center_x, center_y, radius, params, font):
+    labels = ["洞察力", "直感力", "社交性", "独自性", "柔軟性"]
+    angle_step = 2 * math.pi / len(labels)
+    start_angle = -math.pi / 2
+    bg_pts = [(center_x + radius * math.cos(start_angle + i * angle_step), center_y + radius * math.sin(start_angle + i * angle_step)) for i in range(5)]
+    draw.polygon(bg_pts, fill=(20, 25, 40, 200)) 
+    for r_ratio in [0.25, 0.5, 0.75, 1.0]:
+        r = radius * r_ratio
+        pts = [(center_x + r * math.cos(start_angle + i * angle_step), center_y + r * math.sin(start_angle + i * angle_step)) for i in range(5)]
+        draw.polygon(pts, outline=(120, 140, 180, 255), width=2)
+    data_points = []
+    for i, label in enumerate(labels):
+        angle = start_angle + i * angle_step
+        ax, ay = center_x + radius * math.cos(angle), center_y + radius * math.sin(angle)
+        draw.line([(center_x, center_y), (ax, ay)], fill=(120, 140, 180, 255), width=2)
+        lx, ly = center_x + (radius + 60) * math.cos(angle), center_y + (radius + 40) * math.sin(angle)
+        draw.text((lx, ly), label, font=font, fill=(255, 255, 255), anchor="mm")
+        val = params.get(label, 70) / 100.0
+        data_points.append((center_x + (radius * val) * math.cos(angle), center_y + (radius * val) * math.sin(angle)))
+    draw.polygon(data_points, fill=(255, 215, 0, 100), outline=(255, 215, 0, 255), width=6)
+    for pt in data_points: draw.ellipse([pt[0]-10, pt[1]-10, pt[0]+10, pt[1]+10], fill=(255, 255, 255), outline=(255, 215, 0), width=4)
+
+def generate_carousel_images(user_icon_img, type_name, wuxing_type, tags, params, text_blocks):
+    images = []
+    title_font, ssr_font = get_readable_font(42), get_readable_font(34)
+    subtitle_font, heading_font = get_readable_font(42), get_readable_font(40)
+    body_font, tag_font, chart_font, thank_font = get_readable_font(30), get_readable_font(28), get_readable_font(30), get_readable_font(44)
+
+    # 1枚目
+    img1, draw1 = create_base_card()
+    draw1.text((540, 120), "― 陰陽心理鑑定 ―", font=subtitle_font, fill=(255, 224, 102), anchor="mm")
+    icon_size = 530
+    icon_cropped = ImageOps.fit(user_icon_img.convert("RGBA"), (icon_size, icon_size), Image.Resampling.LANCZOS)
+    mask = Image.new("L", (icon_size, icon_size), 0)
+    ImageDraw.Draw(mask).ellipse((0, 0, icon_size, icon_size), fill=255)
+    icon_x, icon_y = (1080 - icon_size) // 2, 200
+    img1.paste(icon_cropped, (icon_x, icon_y), mask)
+    draw1.ellipse([icon_x-6, icon_y-6, icon_x+icon_size+6, icon_y+icon_size+6], outline=(255, 215, 0), width=8)
+    draw1.rectangle([70, 770, 1010, 910], fill=(20, 25, 40, 230), outline=(212, 175, 55), width=3)
+    draw1.text((540, 810), "★ SSR ★", font=ssr_font, fill=(255, 235, 120), anchor="mm")
+    wrapped_title = wrap_text(type_name, title_font, 880)
+    draw1.text((540, 865), wrapped_title[0], font=title_font, fill=(255, 255, 255), anchor="mm")
+    tag_str = f"五行: {wuxing_type} / " + " ".join([f"#{t.strip('#')}" for t in tags[:3]])
+    wrapped_tags = wrap_text(tag_str, tag_font, 900)
+    for i, wt in enumerate(wrapped_tags): draw1.text((540, 950 + i * 45), wt, font=tag_font, fill=(200, 220, 255), anchor="mm")
+    images.append(img1)
+
+    # 2枚目
+    img2, draw2 = create_base_card()
+    draw2.text((540, 130), "【 潜在能力パラメーター 】", font=heading_font, fill=(255, 224, 102), anchor="mm")
+    draw_radar_chart(draw2, center_x=540, center_y=600, radius=320, params=params, font=chart_font)
+    images.append(img2)
+
+    # 3枚目
+    img3, draw3 = create_base_card()
+    draw3.text((100, 110), "■ 基本性格と深層心理", font=heading_font, fill=(64, 224, 208))
+    y_offset = 180
+    for line in wrap_text(text_blocks.get("summary_card", ""), body_font, 880):
+        if y_offset > 480: break
+        draw3.text((100, y_offset), line, font=body_font, fill=(240, 240, 250)); y_offset += 48
+    y_offset = 550
+    draw3.text((100, y_offset), "■ 対人コミュニケーション", font=heading_font, fill=(255, 140, 0))
+    y_offset += 70
+    for line in wrap_text(text_blocks.get("comm_card", ""), body_font, 880):
+        if y_offset > 980: draw3.text((100, y_offset), "...", font=body_font, fill=(240, 240, 250)); break
+        draw3.text((100, y_offset), line, font=body_font, fill=(240, 240, 250)); y_offset += 48
+    images.append(img3)
+
+    # 4枚目
+    img4, draw4 = create_base_card()
+    draw4.text((100, 120), "🔮 開運アドバイス", font=heading_font, fill=(224, 176, 255))
+    y_offset = 200
+    for line in wrap_text(text_blocks.get("advice_card", ""), body_font, 880):
+        draw4.text((100, y_offset), line, font=body_font, fill=(240, 240, 250)); y_offset += 48
+    y_offset += 80
+    phrase = text_blocks.get("phrase", "")
+    if phrase:
+        wrapped_phrase = wrap_text(f"「{phrase}」", heading_font, 860)
+        box_height = len(wrapped_phrase) * 60 + 50
+        draw4.rectangle([70, y_offset, 1010, y_offset + box_height], fill=(40, 30, 50, 230), outline=(255, 215, 0), width=4)
+        phrase_y = y_offset + 25
+        for w in wrapped_phrase: draw4.text((540, phrase_y + 25), w, font=heading_font, fill=(255, 224, 102), anchor="mm"); phrase_y += 60
+    button_y = 920
+    draw4.rectangle([140, button_y, 940, button_y + 100], fill=(220, 50, 50), outline=(255, 215, 0), width=5)
+    draw4.text((540, button_y + 48), "👉 スワイプしてくれてありがとう！ ✨", font=thank_font, fill=(255, 255, 255), anchor="mm")
+    images.append(img4)
+
+    return images
+
+def generate_omikuji_card_image(fortune_type, omikuji_raw_text):
+    card_w, card_h = 1080, 1700
+    card = Image.new("RGBA", (card_w, card_h), (25, 18, 30, 255))
+    draw = ImageDraw.Draw(card)
+    
+    title_font = get_readable_font(36)
+    fortune_font = get_readable_font(68)
+    heading_font = get_readable_font(28)
+    body_font = get_readable_font(23)
+    footer_font = get_readable_font(22)
+    
+    draw.rectangle([20, 20, card_w - 20, card_h - 20], outline=(212, 175, 55), width=5)
+    draw.rectangle([30, 30, card_w - 30, card_h - 30], outline=(255, 224, 102), width=2)
+    draw.text((card_w // 2, 60), "― 陰陽開運おみくじ ―", font=title_font, fill=(255, 224, 102), anchor="mm")
+    
+    fortune_color = (255, 90, 90) if fortune_type in ["超大吉", "大吉"] else ((180, 200, 210) if fortune_type == "凶" else (255, 224, 102))
+    draw.rectangle([card_w // 2 - 180, 95, card_w // 2 + 180, 185], fill=(40, 25, 45), outline=fortune_color, width=4)
+    draw.text((card_w // 2, 140), fortune_type, font=fortune_font, fill=fortune_color, anchor="mm")
+    
+    box_top, box_bottom = 200, 1620
+    draw.rectangle([45, box_top, card_w - 45, box_bottom], fill=(18, 12, 24), outline=(100, 80, 120), width=2)
+    
+    lines = omikuji_raw_text.split('\n')
+    y_offset = box_top + 20
+    for line in lines:
+        if y_offset > box_bottom - 30: break
+        clean_line = re.sub(r'\*+', '', line).strip()
+        if not clean_line or clean_line.startswith("---") or clean_line.startswith("==="): continue
+        
+        if "【" in clean_line and "】" in clean_line:
+            y_offset += 12
+            draw.text((card_w // 2, y_offset), clean_line, font=heading_font, fill=(255, 220, 100), anchor="mm")
+            y_offset += 32
+        else:
+            wrapped = wrap_text(clean_line, body_font, 950)
+            for w in wrapped:
+                if y_offset > box_bottom - 25: break
+                draw.text((card_w // 2, y_offset), w, font=body_font, fill=(240, 240, 250), anchor="mm")
+                y_offset += 28
+            y_offset += 4
+
+    draw.text((card_w // 2, 1655), "--- 陰陽SNSアイコン診断 & 開運おみくじ ---", font=footer_font, fill=(160, 170, 190), anchor="mm")
+    return card
+
+# ── 四柱推命計算関数 ──
 HOUR_ZHI_MAP = [
     (23, 1, "子"), (1, 3, "丑"), (3, 5, "寅"), (5, 7, "卯"),
     (7, 9, "辰"), (9, 11, "巳"), (11, 13, "午"), (13, 15, "未"),
@@ -500,9 +738,7 @@ def calculate_four_pillars(dt: datetime.date, hour_val=None):
         "wuxing_counts": wuxing_counts
     }
 
-# ------------------------------------------
-# 🧭 九星気学ロジック（添付コードより移植）
-# ------------------------------------------
+# ── 九星気学計算関数 ──
 def get_honmei_sei(birth_date: datetime.date) -> str:
     year = birth_date.year
     if birth_date < datetime.date(year, 2, 4):
@@ -511,14 +747,12 @@ def get_honmei_sei(birth_date: datetime.date) -> str:
     return NINE_STARS[remainder]
 
 def get_day_star(dt: datetime.date) -> str:
-    """日付から日盤の盤面中宮（中心）の九星を固定算出"""
     base_date = datetime.date(2024, 1, 1)
     diff = (dt - base_date).days
     remainder = (0 - diff) % 9
     return NINE_STARS[remainder]
 
 def get_day_board(center_star: str) -> dict:
-    """中宮の星から8方位の九星を算出"""
     center_idx = NINE_STARS.index(center_star)
     offsets = {"北": 4, "北東": 7, "東": 2, "南東": 3, "南": 8, "南西": 1, "西": 5, "北西": 6}
     board = {}
@@ -528,7 +762,6 @@ def get_day_board(center_star: str) -> dict:
     return board
 
 def calculate_exact_directions(birth_date: datetime.date, target_date: datetime.date):
-    """Python側で九星気学に基づき100%固定で吉方位・凶方位を計算"""
     honmei_sei = get_honmei_sei(birth_date)
     user_element = STAR_ELEMENTS[honmei_sei]
     
@@ -567,7 +800,6 @@ def calculate_exact_directions(birth_date: datetime.date, target_date: datetime.
             
     return honmei_sei, good_dirs, bad_dirs
 
-# 🧭 九星気学（3×3動的方位盤：添付コードより移植）
 def render_compass_board(good_dirs, bad_dirs, honmei_sei):
     grid_layout = [
         ("南東", "大吉 ⭕" if "南東" in good_dirs else ("凶 ❌" if "南東" in bad_dirs else "―")),
@@ -671,156 +903,375 @@ if st.session_state.mode is None:
             st.session_state.mode = "direction_only"; st.rerun()
 
 # ------------------------------------------
-# 📜 モード4: 四柱推命・本命命式鑑定
+# 🖼️️ モード1: アイコン診断（本来の3ステップ＆4枚スライド画像合成仕様）
 # ------------------------------------------
-elif st.session_state.mode == "four_pillars":
-    st.markdown('<div class="omikuji-heading">📜 四柱推命・本命命式＆開運鑑定 📜</div>', unsafe_allow_html=True)
-    if st.button("⬅️ 最初に戻る", use_container_width=True):
+elif st.session_state.mode == "diagnosis":
+    if st.button("⬅️ モード選択に戻る", use_container_width=True):
         st.session_state.mode = None
-        st.session_state.four_pillars_text = None
+        st.session_state.step = 0
+        st.session_state.result_text = None
+        st.session_state.card_images = None
+        st.session_state.omikuji_text = None
+        st.session_state.omikuji_card_image = None
         st.rerun()
 
-    st.markdown('<p class="center-msg">生年月日・時間・性別を入力すると、あなたの命式（年柱・月柱・日柱・時柱）と五行バランス、本日の開運運勢を詳細鑑定します！</p>', unsafe_allow_html=True)
-    
-    b_input_fp = st.text_input("生年月日を8桁の数字で入力（例: 19900101）", value=st.session_state.birth_date_str, max_chars=8, key="b_fp_input")
-    st.session_state.birth_date_str = b_input_fp
+    step_labels = ["1. 生年月日", "2. アイコン選択", "3. 鑑定実行"]
+    step_html = "<div class='step-container'>"
+    for i, lbl in enumerate(step_labels):
+        active_cls = " active" if i == st.session_state.step else ""
+        step_html += f"<div class='step-box{active_cls}'>{lbl}</div>"
+    step_html += "</div>"
+    st.markdown(step_html, unsafe_allow_html=True)
 
-    col_fp1, col_fp2 = st.columns(2)
-    with col_fp1:
-        gender = st.radio("性別", ["女性", "男性"], horizontal=True, key="gender_input")
-    with col_fp2:
-        hours_options = ["不明"] + [f"{h:02d}:00頃" for h in range(24)]
-        selected_hour_str = st.selectbox("生まれた時間（分かる場合）", hours_options, key="hour_input")
+    # STEP 0: 生年月日の入力
+    if st.session_state.step == 0:
+        st.subheader("🗓️ 生年月日の入力")
+        b_input = st.text_input("生年月日を8桁の数字で入力してください（例: 19900101）", value="19900101" if st.session_state.birth_date_str == "19700101" else st.session_state.birth_date_str, max_chars=8)
+        st.session_state.birth_date_str = b_input
+        st.write("")
+        if st.button("次へ進む ➔（アイコン選択へ）", type="primary", use_container_width=True):
+            if len(b_input) == 8 and b_input.isdigit():
+                st.session_state.step = 1
+                st.rerun()
+            else:
+                st.error("生年月日は8桁の数字で入力してください。")
 
-    hour_val = None
-    if selected_hour_str != "不明":
-        hour_val = int(selected_hour_str.split(":")[0])
-
-    if st.button("☯️ 命式を解読して鑑定する ☯️", type="primary", use_container_width=True):
-        active_key = get_api_key()
-        if not active_key:
-            st.error(".env ファイルに GEMINI_API_KEY を設定するか、API Key を確認してください。")
-        elif len(b_input_fp) != 8 or not b_input_fp.isdigit():
-            st.error("生年月日は8桁の数字で入力してください。")
-        else:
-            try:
-                valid_date = datetime.date(int(b_input_fp[:4]), int(b_input_fp[4:6]), int(b_input_fp[6:8]))
-                
-                fp_data = calculate_four_pillars(valid_date, hour_val)
-                today_fp = calculate_four_pillars(datetime.date.today())
-
-                status_holder_fp = st.empty()
-                with status_holder_fp.container():
-                    render_video("cat_video2.mp4")
-                    with st.spinner("四柱推命の盤面と時柱・五行バランスを解析中..."):
-                        prompt_fp = f"""
-あなたは四柱推命の真髄を極めた知的な陰陽師です。
-
-ユーザー命式データ:
-- 性別: 『{gender}』
-- 日干（本質）: 『{fp_data['nikkan']}（五行: {fp_data['nikkan_element']}）』
-- メイン格（通変星中心）: 『{fp_data['main_kaku']}格』
-- 五行バランス（要素数）: {fp_data['wuxing_counts']}
-- 年柱干支: 『{fp_data['year_kanto']}』（通変星: {fp_data['year_tsuhen']}）
-- 月柱干支: 『{fp_data['month_kanto']}』（通変星: {fp_data['month_tsuhen']}）
-- 日柱干支: 『{fp_data['day_kanto']}』
-- 時柱干支: 『{fp_data['hour_kanto']}』（通変星: {fp_data['hour_tsuhen']}）
-- 本日の日干支: 『{today_fp['day_kanto']}』
-
-【厳格出力ルール】
-※マークダウンの太字（**）は使用禁止。
-性別（{gender}）およびメイン属性「{fp_data['main_kaku']}格」を含めた高精度な命式データから、四柱推命の観点で深く知性あふれる本日のアドバイスを作成してください。
-
-【本日の全体運＆開運ポイント】
-[日干「{fp_data['nikkan']}」および「{fp_data['main_kaku']}格」の本質から見る、本日絶好調な点と注意すべきポイント（2-3文）]
-
-【項目別詳細運勢】
-💖 恋愛・対人運: [{gender}の視点も含めた対人アドバイス]
-💼 仕事・学業運: [アドバイス内容]
-✈️ 旅行・お出かけ運: [アドバイス内容]
-
-【本日の開運キーアイテム】
-・ラッキーカラー：エメラルドグリーン、ゴールド
-・開運アクション：[幸運を引き寄せる具体的な行動]
-"""
-                        client = genai.Client(api_key=active_key)
-                        response_fp = client.models.generate_content(
-                            model=GEMINI_MODEL_NAME,
-                            contents=prompt_fp
-                        )
-                        st.session_state.four_pillars_text = response_fp.text
-                        st.session_state.fp_data = fp_data
-                        st.session_state.gender = gender
-                status_holder_fp.empty()
-            except Exception as e:
-                st.error(f"四柱推命鑑定中にエラーが発生しました: {e}")
-
-    if st.session_state.four_pillars_text and "fp_data" in st.session_state:
-        fp = st.session_state.fp_data
-        user_gender = st.session_state.get("gender", "女性")
-
-        # 📊 四柱推命 4柱フル対応命式チャート表示
-        st.markdown(f"""
-        <div class="notranslate" style="background: rgba(10, 14, 26, 0.65); backdrop-filter: blur(10px); border: 1.5px solid rgba(255, 215, 0, 0.8); border-radius: 14px; padding: 1.2rem; margin-top: 1.2rem; box-shadow: 0 4px 20px rgba(0,0,0,0.5);">
-            <h3 style="color:#FFE066; text-align:center; margin-top:0; font-size: 1.25rem; text-shadow:0 2px 4px #000;">📜 あなたの四柱推命 精密命式チャート 📜</h3>
-            <div style="text-align:center; color:#CCCCCC; font-size:0.85rem; margin-bottom:8px;">性別: {user_gender}</div>
-            <table class="meishiki-table">
-                <tr>
-                    <th>項目</th>
-                    <th>年柱（祖先・幼少）</th>
-                    <th>月柱（社会・青年）</th>
-                    <th>日柱（自分・本質）</th>
-                    <th>時柱（晩年・子孫）</th>
-                </tr>
-                <tr>
-                    <td style="color:#FFE066;">天干地支</td>
-                    <td>{fp['year_kanto']}</td>
-                    <td>{fp['month_kanto']}</td>
-                    <td class="highlight-nikkan">{fp['day_kanto']}</td>
-                    <td>{fp['hour_kanto']}</td>
-                </tr>
-                <tr>
-                    <td style="color:#FFE066;">通変星</td>
-                    <td>{fp['year_tsuhen']}</td>
-                    <td style="color:#FFD700; background:rgba(255,215,0,0.25);">{fp['month_tsuhen']}</td>
-                    <td style="color:#4EAEFF;">日干（主星）</td>
-                    <td>{fp['hour_tsuhen']}</td>
-                </tr>
-            </table>
-            <div style="text-align:center; color:#E0B0FF; font-size:0.95rem; font-weight:bold;">
-                ✨ あなたの主格: <span style="font-size:1.2rem; color:#FFD700;">【{fp['main_kaku']}格】</span> / 日干: <span style="font-size:1.2rem; color:#FFD700;">【{fp['nikkan']}】</span>（五行: {fp['nikkan_element']}）
-            </div>
+    # STEP 1: アイコン選択
+    elif st.session_state.step == 1:
+        st.subheader("🖼️ SNSアイコンのアップロード")
+        st.markdown("""
+        <div class="upload-card-container">
+            <h3 style="color: #FFE066; margin-top: 0; font-size: 1.1rem;">✨ SNSアイコンを👇にUPしてください ✨</h3>
+            <p style="color: #CCCCCC; font-size: 0.85rem; margin-bottom: 0.5rem;">陰陽心理鑑定で、アイコンの特徴と魅力を解説します！</p>
         </div>
         """, unsafe_allow_html=True)
 
-        # ☯️ 五行バランスレーダーチャート
-        st.markdown("<h4 style='color:#FFE066; text-align:center; margin-top:1.5rem; margin-bottom:0.2rem; text-shadow:0 2px 4px #000;'>☯️ 五行エネルギーバランス ☯️</h4>", unsafe_allow_html=True)
-        st.markdown(f"<p style='text-align:center; color:#E0E0E0; font-size:0.85rem; margin-bottom:0;'>※あなたの魂のシンボル（日干: <b>{fp['nikkan_element']}</b>）を頂点（真上）に配置しています</p>", unsafe_allow_html=True)
-        render_wuxing_radar(fp['wuxing_counts'], fp['nikkan_element'])
+        st.info(
+            "⚠️ **ご安心してご利用いただくために**\n\n"
+            "• アップロードされた画像は診断の解析にのみ使用され、外部への保存や公開は一切されません。\n"
+            "• ご自身が所有しているアイコンや、権利上の問題がない画像をご使用ください。"
+        )
 
-        st.markdown("<h4 style='color:#FFE066; margin-top:1.2rem; margin-bottom:0.8rem; text-shadow:0 2px 4px #000;'>【本日の四柱推命 開運鑑定】</h4>", unsafe_allow_html=True)
-        
-        lines = [re.sub(r'\*+', '', l).strip() for l in st.session_state.four_pillars_text.split('\n') if l.strip()]
-        for line in lines:
-            line_colored = colorize_lucky_colors(line)
+        uploaded_file = st.file_uploader("アイコン画像（PNG、JPG）", type=["png", "jpg", "jpeg"], label_visibility="collapsed")
+        if uploaded_file is not None:
+            st.session_state.uploaded_file = uploaded_file
+            col1, col2, col3 = st.columns([1, 2, 1])
+            with col2: st.image(Image.open(uploaded_file), caption="📷 選択されたアイコンプレビュー", use_container_width=True)
+        st.write("")
+        col_prev, col_next = st.columns(2)
+        with col_prev:
+            if st.button("⬅️ 前へ戻る", use_container_width=True): st.session_state.step = 0; st.rerun()
+        with col_next:
+            if st.button("次へ進む ➔（鑑定実行へ）", type="primary", use_container_width=True):
+                if "uploaded_file" in st.session_state and st.session_state.uploaded_file is not None:
+                    st.session_state.step = 2; st.rerun()
+                else: st.warning("アイコン画像をアップロードしてください。")
+
+    # STEP 2: 鑑定実行 & 結果表示
+    elif st.session_state.step == 2:
+        st.subheader("🔮 鑑定の準備が整いました🔮")
+        col_prev, col_start = st.columns([1, 2])
+        with col_prev:
+            if st.button("⬅️ 前へ戻る", use_container_width=True): st.session_state.step = 1; st.rerun()
+        with col_start:
+            start_button = st.button("☯️ 鑑定を開始する ☯️", type="primary", use_container_width=True)
+
+        if start_button:
+            birth_str = st.session_state.birth_date_str
+            try:
+                valid_date = datetime.date(int(birth_str[:4]), int(birth_str[4:6]), int(birth_str[6:8]))
+            except:
+                valid_date = None
+
+            active_key = get_api_key()
+            if not active_key:
+                st.error(".env ファイルに GEMINI_API_KEY を設定するか、API Key を確認してください。")
+            elif valid_date is None:
+                st.error("生年月日のフォーマットが正しくありません。")
+            elif "uploaded_file" not in st.session_state or st.session_state.uploaded_file is None:
+                st.warning("アイコン画像がありません。")
+            else:
+                try:
+                    image = Image.open(st.session_state.uploaded_file)
+                    wuxing_info = calculate_guxing_info(valid_date, datetime.date.today())
+                    st.session_state.omikuji_text = None
+                    st.session_state.omikuji_result_type = None
+                    st.session_state.omikuji_card_image = None
+                    st.session_state.card_images = None
+
+                    status_holder = st.empty()
+                    with status_holder.container():
+                        render_video("cat_video3.mp4")
+
+                        with st.spinner("深層心理を解析し、鑑定結果を錬成中..."):
+                            prompt = f"""
+あなたは人間観察に長けた、非常に知的な陰陽心理鑑定士です。
+提供された「SNSアイコン画像」の細かい視覚的特徴（被写体、服装、背景、構図、色合い、ギャップなど）を巧みに分析し、ユーザーのパーソナリティを読み解いてください。
+※文章中で太字（**）などのマークダウン装飾記号は絶対に使わないでください。
+
+以下のフォーマットを「必ず」厳守して出力してください。
+
+--------------------------------------------------
+■ 診断結果：【[キャッチーな〇〇タイプ名]】
+■ 3つのハッシュタグ: #[タグ1], #[タグ2], #[タグ3]
+■ パラメータ: 洞察力:[40-100], 直感力:[40-100], 社交性:[40-100], 独自性:[40-100], 柔軟性:[40-100]
+
+[アイコン全体の印象やセルフプロデュース力、視覚的ギャップについて、3〜4文で引き込まれる導入を書く]
+
+1. 性格・行動の傾向
+[画像の具体的な要素を根拠にして詳しく深く考察する（読み応えのあるボリュームで記述）]
+
+2. コミュニケーションと人間関係
+[人間関係での立ち位置や距離感などを詳しく解説する（読み応えのあるボリュームで記述）]
+
+3. あなたへのアドバイス・キーワード
+・アドバイス: [魅力をさらに高めるための深いアドバイス]
+・キーフレーズ: 「[ユーザーの本質を表す素敵なフレーズ]」
+
+--------------------------------------------------
+🔮 本日のワンポイント開運鑑定（五行タイプ: {wuxing_info['user_wuxing']}）
+[誕生日({valid_date})の五行気質「{wuxing_info['user_wuxing']}」と本日の気質「{wuxing_info['today_wuxing']}」を掛け合わせ、今日を最高の1日にするためのアドバイスを伝えてください]
+"""
+                            client = genai.Client(api_key=active_key)
+                            
+                            img_byte_arr = io.BytesIO()
+                            img_format = image.format if image.format and image.format.upper() in ["PNG", "JPEG", "JPG"] else "JPEG"
+                            image.save(img_byte_arr, format=img_format)
+                            img_bytes = img_byte_arr.getvalue()
+                            mime_type = f"image/{img_format.lower()}"
+                            if mime_type == "image/jpg":
+                                mime_type = "image/jpeg"
+
+                            response = client.models.generate_content(
+                                model=GEMINI_MODEL_NAME,
+                                contents=[
+                                    types.Part.from_bytes(data=img_bytes, mime_type=mime_type),
+                                    prompt
+                                ]
+                            )
+
+                            result_text = response.text
+                            st.session_state.result_text = result_text
+
+                            type_match = re.search(r'■ 診断結果：【(.*?)】', result_text)
+                            type_name = type_match.group(1) if type_match else "神秘の探求者タイプ"
+                            tags_match = re.search(r'■ 3つのハッシュタグ:\s*(.*)', result_text)
+                            tags = [t.strip() for t in tags_match.group(1).split(',')] if tags_match else ["#隠れ情熱派", "#独自の世界観", "#観察眼"]
+                            params = {"洞察力": 80, "直感力": 75, "社交性": 60, "独自性": 85, "柔軟性": 70}
+                            param_match = re.search(r'■ パラメータ:\s*(.*)', result_text)
+                            if param_match:
+                                for item in param_match.group(1).split(','):
+                                    if ':' in item:
+                                        k, v = item.split(':')
+                                        v_num = re.sub(r'\D', '', v)
+                                        if k.strip() in params and v_num: params[k.strip()] = min(100, max(30, int(v_num)))
+                            phrase_match = re.search(r'キーフレーズ: 「(.*?)」', result_text)
+                            key_phrase = phrase_match.group(1) if phrase_match else "秘めたる才能が開花する刻"
+
+                            summary_text, comm_text, advice_text = "", "", ""
+                            lines = result_text.split('\n')
+                            for i, line in enumerate(lines):
+                                if "1. 性格・行動の傾向" in line: summary_text = " ".join([l.strip() for l in lines[i+1:i+6] if l.strip() and not l.startswith("2.")]).strip()
+                                if "2. コミュニケーションと人間関係" in line: comm_text = " ".join([l.strip() for l in lines[i+1:i+6] if l.strip() and not l.startswith("3.")]).strip()
+                                if "・アドバイス:" in line: advice_text = line.replace("・アドバイス:", "").strip()
+
+                            if not summary_text: 
+                                summary_text = random.choice([
+                                    "独自の感性と鋭い直感を持つ個性派。",
+                                    "内に秘めた情熱と冷静な判断力を併せ持つタイプ。",
+                                    "周囲を惹きつけるミステリアスな魅力の持ち主。"
+                                ])
+                            if not comm_text: 
+                                comm_text = random.choice([
+                                    "周囲を魅了する独特の雰囲気を備えています。",
+                                    "適度な距離感を保ちながら、深い信頼関係を築きます。"
+                                ])
+                            if not advice_text: 
+                                advice_text = random.choice([
+                                    "自分の直感を信じて一歩踏み出すことで、新たな運気が開けます。",
+                                    "肩の力を抜いてリラックスする時間を作ることで、さらなるひらめきが訪れます。"
+                                ])
+
+                            text_blocks = {
+                                "summary_card": summary_text[:180] + "..." if len(summary_text) > 180 else summary_text,
+                                "comm_card": comm_text[:180] + "..." if len(comm_text) > 180 else comm_text,
+                                "advice_card": advice_text[:140] + "..." if len(advice_text) > 140 else advice_text,
+                                "phrase": key_phrase
+                            }
+
+                            st.session_state.card_images = generate_carousel_images(image, type_name, wuxing_info['user_wuxing'], tags, params, text_blocks)
+                    status_holder.empty()
+                except Exception as e:
+                    st.error(f"鑑定中にエラーが発生しました: {e}")
+
+        # 診断結果カード描画
+        if st.session_state.result_text and st.session_state.card_images:
+            st.success("✨ 鑑定画像が完成しました！※インスタ用サイズ ✨")
+            cols = st.columns(2)
+            for i, img in enumerate(st.session_state.card_images):
+                cols[i % 2].image(img, caption=f"【{i+1}枚目】", use_container_width=True)
+                
+            buf = io.BytesIO()
+            with zipfile.ZipFile(buf, "w") as z:
+                for i, img in enumerate(st.session_state.card_images):
+                    img_byte_arr = io.BytesIO()
+                    img.save(img_byte_arr, format='PNG')
+                    z.writestr(f"manga_slide_{i+1}.png", img_byte_arr.getvalue())
             
-            if any(line.startswith(prefix) for prefix in ["💖", "💼", "✈️"]):
-                parts = line_colored.split(":", 1)
-                st.markdown(f"""
-                <div class="glass-card-box">
-                    <div style="color:#FFE066; font-size:1.05rem; font-weight:bold; margin-bottom:6px;">{parts[0]}</div>
-                    <div style="color:#FFFFFF; font-size:0.98rem; line-height:1.7; font-weight:600;">{parts[1] if len(parts)>1 else ""}</div>
-                </div>
-                """, unsafe_allow_html=True)
-            elif not line.startswith("【"):
-                st.markdown(f"""
-                <div class="glass-card-box">
-                    <div style="color:#FFFFFF; font-size:0.98rem; line-height:1.7; font-weight:600;">{line_colored}</div>
-                </div>
-                """, unsafe_allow_html=True)
+            st.download_button(label="📦 4枚の画像をまとめて保存する（ZIP）", data=buf.getvalue(), file_name="diagnosis_4slides.zip", mime="application/zip", use_container_width=True)
+            st.markdown("---")
+
+            lines = st.session_state.result_text.split("\n")
+            formatted_html_body = ""
+            for line in lines:
+                line_str = line.strip()
+                clean_line = re.sub(r'\*+', '', line_str).strip()
+                clean_line = format_wuxing_color(clean_line)
+                if clean_line.startswith("■ 診断結果："): formatted_html_body += f"<div style='color:#FFD700; font-size:1.30rem; font-weight:bold; margin-top:1.2rem; margin-bottom:0.6rem; border-bottom:1px solid #FFD700; padding-bottom:0.3rem;'>{clean_line}</div>"
+                elif clean_line.startswith("■ 3つのハッシュタグ:"): formatted_html_body += f"<div style='color:#FFE066; font-size:1.05rem; font-weight:bold; margin-bottom:0.6rem;'>{clean_line}</div>"
+                elif clean_line.startswith("■ パラメータ:"): continue
+                elif clean_line.startswith("1. "): formatted_html_body += f"<div style='color:#4EAEFF; font-size:1.12rem; font-weight:bold; margin-top:1.2rem; margin-bottom:0.4rem;'>{clean_line}</div>"
+                elif clean_line.startswith("2. "): formatted_html_body += f"<div style='color:#40E0D0; font-size:1.12rem; font-weight:bold; margin-top:1.2rem; margin-bottom:0.4rem;'>{clean_line}</div>"
+                elif clean_line.startswith("3. "): formatted_html_body += f"<div style='color:#FF8C00; font-size:1.12rem; font-weight:bold; margin-top:1.2rem; margin-bottom:0.4rem;'>{clean_line}</div>"
+                elif clean_line.startswith("🔮 本日のワンポイント開運鑑定"): formatted_html_body += f"<div style='color:#E0B0FF; font-size:1.2rem; font-weight:bold; margin-top:1.4rem; margin-bottom:0.6rem; border-bottom:1px solid #E0B0FF; padding-bottom:0.3rem;'>{clean_line}</div>"
+                elif clean_line.startswith("・"): formatted_html_body += f"<div style='color:#FFF3C4; font-size:0.98rem; line-height:1.6; margin-bottom:0.3rem; padding-left:0.5rem;'>{clean_line}</div>"
+                elif clean_line == "": formatted_html_body += "<div style='height:0.5rem;'></div>"
+                else: formatted_html_body += f"<div style='color:#FFFFFF; font-size:0.98rem; line-height:1.7; margin-bottom:0.4rem;'>{clean_line}</div>"
+
+            card_html = f"""
+            <div class="notranslate" style="background: rgba(10, 15, 25, 0.75); backdrop-filter: blur(8px); border: 1.5px solid rgba(212, 175, 55, 0.8); border-radius: 14px; padding: 1.5rem; margin-top: 1.2rem; margin-bottom: 2.0rem;">
+                <h3 style="color:#FFE066; text-align:center; margin-top:0; font-size: 1.2rem;">📖 鑑定結果の詳細</h3>
+                {formatted_html_body}
+            </div>
+            """
+            st.markdown(card_html, unsafe_allow_html=True)
+
+            st.markdown("---")
+            st.markdown('<div class="omikuji-heading">⛩️ 今日の運試し ⛩️</div>', unsafe_allow_html=True)
+            st.markdown('<p class="center-msg">鑑定結果をご覧いただいたあなたへ。本日の「開運おみくじ」を引いてみませんか！</p>', unsafe_allow_html=True)
+            
+            if st.button("☯️ おみくじを引く！ ☯️", type="primary", use_container_width=True, key="omikuji_btn_diag"):
+                active_key = get_api_key()
+                if not active_key:
+                    st.error(".env ファイルに GEMINI_API_KEY を設定するか、API Key を確認してください。")
+                else:
+                    fortune_list = ["超大吉", "大吉", "中吉", "小吉", "吉", "末吉", "凶"]
+                    selected_fortune = random.choice(fortune_list)
+                    st.session_state.omikuji_result_type = selected_fortune
+                    
+                    status_holder_diag = st.empty()
+                    with status_holder_diag.container():
+                        render_video("cat_video4.mp4")
+                        with st.spinner("黒猫がみくじ筒をシャカシャカ振り振り、おみくじデータを錬成中..."):
+                            try:
+                                omikuji_prompt = f"""
+あなたは黒猫の陰陽師です。本格的で読み応えのある神社のおみくじの文章を作成してください。
+今回の運勢結果は『{selected_fortune}』です。
+以下の項目に沿って、少しのユーモアと温かい知性を含め、充実した内容で記述してください。
+※文章中で太字（**）などのマークダウン装飾記号は絶対に使わないでください。
+
+【全体運】
+（運勢の背景にある深い意味と、心構えを2〜3文で味わい深く書いてください）
+【仕事・学業運】
+（具体的なアドバイスや成果を出すためのコツを2文程度で書いてください）
+【恋愛・対人運】
+（人間関係を良好にするための秘訣を2文程度で書いてください）
+【健康運】
+（心身を健やかに保つための温かいアドバイスを書いてください）
+【旅行・お出かけ運】
+（吉となる方角や、お出かけ時の心構えを書いてください）
+【ラッキーAIツール】
+（例: ChatGPT, Gemini等のなかから1つと、その活用ワンポイント）
+【SNS開運アクション】
+（今日SNSで運気を上げるための具体的なアクション）
+【黒猫陰陽師からの裏ひとこと】
+（クスッと笑える親しみやすくユーモアのあるアドバイス）
+"""
+                                client = genai.Client(api_key=active_key)
+                                omikuji_response = client.models.generate_content(
+                                    model=GEMINI_MODEL_NAME,
+                                    contents=omikuji_prompt
+                                )
+
+                                st.session_state.omikuji_text = omikuji_response.text
+                                st.session_state.omikuji_card_image = generate_omikuji_card_image(selected_fortune, omikuji_response.text)
+                                trigger_omikuji_animation(selected_fortune)
+                            except Exception as e: 
+                                st.error(f"おみくじ中にエラーが発生しました: {e}")
+                    status_holder_diag.empty()
+
+        if st.session_state.omikuji_text and st.session_state.omikuji_card_image:
+            st.success("⛩️ 今日のおみくじ結果がでました ⛩️ (タップで拡大できます)")
+            st.image(st.session_state.omikuji_card_image, use_container_width=True)
 
 # ------------------------------------------
-# 🧭 モード3: 今日の吉方位診断（添付コード完全準拠版）
+# ⛩️ モード2: 開運おみくじ（おみくじカード画像動的描画＆紙吹雪演出仕様）
+# ------------------------------------------
+elif st.session_state.mode == "omikuji_only":
+    st.markdown('<div class="omikuji-heading">⛩️ 開運おみくじ ⛩️</div>', unsafe_allow_html=True)
+    if st.button("⬅️ 最初に戻る", use_container_width=True):
+        st.session_state.mode = None
+        st.session_state.omikuji_text = None
+        st.session_state.omikuji_card_image = None
+        st.rerun()
+        
+    st.markdown('<p class="center-msg">ボタンを押すと、本日の運勢と開運おみくじが生成されます！</p>', unsafe_allow_html=True)
+    if st.button("☯️ おみくじを引く ☯️", type="primary", use_container_width=True, key="omikuji_btn_single"):
+        active_key = get_api_key()
+        if not active_key:
+            st.error(".env ファイルに GEMINI_API_KEY を設定するか、API Key を確認してください。")
+        else:
+            fortune_list = ["超大吉", "大吉", "中吉", "小吉", "吉", "末吉", "凶"]
+            selected_fortune = random.choice(fortune_list)
+            st.session_state.omikuji_result_type = selected_fortune
+            
+            status_holder = st.empty()
+            with status_holder.container():
+                render_video("cat_video4.mp4")
+                with st.spinner("黒猫がおみくじ筒をシャカシャカ振り振り、おみくじデータを錬成中..."):
+                    try:
+                        omikuji_prompt = f"""
+あなたは黒猫の陰陽師です。本格的で読み応えのある神社のおみくじの文章を作成してください。
+今回の運勢結果は『{selected_fortune}』です。
+以下の項目に沿って、少しのユーモアと温かい知性を含め、充実した内容で記述してください。
+※文章中で太字（**）などのマークダウン装飾記号は絶対に使わないでください。
+
+【全体運】
+（運勢の背景にある深い意味と、心構えを2〜3文で味わい深く書いてください）
+【仕事・学業運】
+（具体的なアドバイスや成果を出すためのコツを2文程度で書いてください）
+【恋愛・対人運】
+（人間関係を良好にするための秘訣を2文程度で書いてください）
+【健康運】
+（心身を健やかに保つための温かいアドバイスを書いてください）
+【旅行・お出かけ運】
+（吉となる方角や、お出かけ時の心構えを書いてください）
+【ラッキーAIツール】
+（例: ChatGPT, Gemini等のなかから1つと、その活用ワンポイント）
+【SNS開運アクション】
+（今日SNSで運気を上げるための具体的なアクション）
+【黒猫陰陽師からの裏ひとこと】
+（クスッと笑える親しみやすくユーモアのあるアドバイス）
+"""
+                        client = genai.Client(api_key=active_key)
+                        omikuji_response = client.models.generate_content(
+                            model=GEMINI_MODEL_NAME,
+                            contents=omikuji_prompt
+                        )
+                        
+                        st.session_state.omikuji_text = omikuji_response.text
+                        st.session_state.omikuji_card_image = generate_omikuji_card_image(selected_fortune, omikuji_response.text)
+                        trigger_omikuji_animation(selected_fortune)
+                    except Exception as e:
+                        st.error(f"おみくじ生成中にエラーが発生しました: {e}")
+            status_holder.empty()
+
+    if st.session_state.omikuji_text and st.session_state.omikuji_card_image:
+        st.success("⛩️ 今日のおみくじ結果がでました ⛩️ (タップで拡大できます)")
+        st.image(st.session_state.omikuji_card_image, use_container_width=True)
+
+# ------------------------------------------
+# 🧭 モード3: 今日の吉方位診断
 # ------------------------------------------
 elif st.session_state.mode == "direction_only":
     st.markdown('<div class="omikuji-heading">🧭 九星気学・今日の吉方位鑑定 🧭</div>', unsafe_allow_html=True)
@@ -843,8 +1294,6 @@ elif st.session_state.mode == "direction_only":
         else:
             try:
                 valid_date = datetime.date(int(b_input_dir[:4]), int(b_input_dir[4:6]), int(b_input_dir[6:8]))
-                
-                # 💡 Python側で九星気学に基づき100%固定計算（添付コード準拠）
                 honmei_sei, exact_good_dirs, exact_bad_dirs = calculate_exact_directions(valid_date, datetime.date.today())
                 
                 good_str = ", ".join(exact_good_dirs) if exact_good_dirs else "特になし（平穏な1日）"
@@ -946,18 +1395,148 @@ elif st.session_state.mode == "direction_only":
                 """, unsafe_allow_html=True)
 
 # ------------------------------------------
-# ⛩️ モード2: 開運おみくじ
+# 📜 モード4: 四柱推命・本命命式鑑定
 # ------------------------------------------
-elif st.session_state.mode == "omikuji_only":
-    st.markdown('<div class="omikuji-heading">⛩️ 開運おみくじ ⛩️</div>', unsafe_allow_html=True)
-    if st.button("⬅️ 最初に戻る", use_container_width=True): st.session_state.mode = None; st.rerun()
-    if st.button("☯️ おみくじを引く ☯️", type="primary", use_container_width=True):
-        st.session_state.omikuji_text = "大吉"
-        st.success("⛩️ 今日のおみくじ結果: 【大吉】 ⛩️")
+elif st.session_state.mode == "four_pillars":
+    st.markdown('<div class="omikuji-heading">📜 四柱推命・本命命式＆開運鑑定 📜</div>', unsafe_allow_html=True)
+    if st.button("⬅️ 最初に戻る", use_container_width=True):
+        st.session_state.mode = None
+        st.session_state.four_pillars_text = None
+        st.rerun()
 
-# ------------------------------------------
-# 🖼️ モード1: アイコン診断
-# ------------------------------------------
-elif st.session_state.mode == "diagnosis":
-    if st.button("⬅️ モード選択に戻る", use_container_width=True): st.session_state.mode = None; st.rerun()
-    st.subheader("🗓️ 生年月日＆診断テイストの選択")
+    st.markdown('<p class="center-msg">生年月日・時間・性別を入力すると、あなたの命式（年柱・月柱・日柱・時柱）と五行バランス、本日の開運運勢を詳細鑑定します！</p>', unsafe_allow_html=True)
+    
+    b_input_fp = st.text_input("生年月日を8桁の数字で入力（例: 19900101）", value=st.session_state.birth_date_str, max_chars=8, key="b_fp_input")
+    st.session_state.birth_date_str = b_input_fp
+
+    col_fp1, col_fp2 = st.columns(2)
+    with col_fp1:
+        gender = st.radio("性別", ["女性", "男性"], horizontal=True, key="gender_input")
+    with col_fp2:
+        hours_options = ["不明"] + [f"{h:02d}:00頃" for h in range(24)]
+        selected_hour_str = st.selectbox("生まれた時間（分かる場合）", hours_options, key="hour_input")
+
+    hour_val = None
+    if selected_hour_str != "不明":
+        hour_val = int(selected_hour_str.split(":")[0])
+
+    if st.button("☯️ 命式を解読して鑑定する ☯️", type="primary", use_container_width=True):
+        active_key = get_api_key()
+        if not active_key:
+            st.error(".env ファイルに GEMINI_API_KEY を設定するか、API Key を確認してください。")
+        elif len(b_input_fp) != 8 or not b_input_fp.isdigit():
+            st.error("生年月日は8桁の数字で入力してください。")
+        else:
+            try:
+                valid_date = datetime.date(int(b_input_fp[:4]), int(b_input_fp[4:6]), int(b_input_fp[6:8]))
+                
+                fp_data = calculate_four_pillars(valid_date, hour_val)
+                today_fp = calculate_four_pillars(datetime.date.today())
+
+                status_holder_fp = st.empty()
+                with status_holder_fp.container():
+                    render_video("cat_video2.mp4")
+                    with st.spinner("四柱推命の盤面と時柱・五行バランスを解析中..."):
+                        prompt_fp = f"""
+あなたは四柱推命の真髄を極めた知的な陰陽師です。
+
+ユーザー命式データ:
+- 性別: 『{gender}』
+- 日干（本質）: 『{fp_data['nikkan']}（五行: {fp_data['nikkan_element']}）』
+- メイン格（通変星中心）: 『{fp_data['main_kaku']}格』
+- 五行バランス（要素数）: {fp_data['wuxing_counts']}
+- 年柱干支: 『{fp_data['year_kanto']}』（通変星: {fp_data['year_tsuhen']}）
+- 月柱干支: 『{fp_data['month_kanto']}』（通変星: {fp_data['month_tsuhen']}）
+- 日柱干支: 『{fp_data['day_kanto']}』
+- 時柱干支: 『{fp_data['hour_kanto']}』（通変星: {fp_data['hour_tsuhen']}）
+- 本日の日干支: 『{today_fp['day_kanto']}』
+
+【厳格出力ルール】
+※マークダウンの太字（**）は使用禁止。
+性別（{gender}）およびメイン属性「{fp_data['main_kaku']}格」を含めた高精度な命式データから、四柱推命の観点で深く知性あふれる本日のアドバイスを作成してください。
+
+【本日の全体運＆開運ポイント】
+[日干「{fp_data['nikkan']}」および「{fp_data['main_kaku']}格」の本質から見る、本日絶好調な点と注意すべきポイント（2-3文）]
+
+【項目別詳細運勢】
+💖 恋愛・対人運: [{gender}の視点も含めた対人アドバイス]
+💼 仕事・学業運: [アドバイス内容]
+✈️ 旅行・お出かけ運: [アドバイス内容]
+
+【本日の開運キーアイテム】
+・ラッキーカラー：エメラルドグリーン、ゴールド
+・開運アクション：[幸運を引き寄せる具体的な行動]
+"""
+                        client = genai.Client(api_key=active_key)
+                        response_fp = client.models.generate_content(
+                            model=GEMINI_MODEL_NAME,
+                            contents=prompt_fp
+                        )
+                        st.session_state.four_pillars_text = response_fp.text
+                        st.session_state.fp_data = fp_data
+                        st.session_state.gender = gender
+                status_holder_fp.empty()
+            except Exception as e:
+                st.error(f"四柱推命鑑定中にエラーが発生しました: {e}")
+
+    if st.session_state.four_pillars_text and "fp_data" in st.session_state:
+        fp = st.session_state.fp_data
+        user_gender = st.session_state.get("gender", "女性")
+
+        st.markdown(f"""
+        <div class="notranslate" style="background: rgba(10, 14, 26, 0.65); backdrop-filter: blur(10px); border: 1.5px solid rgba(255, 215, 0, 0.8); border-radius: 14px; padding: 1.2rem; margin-top: 1.2rem; box-shadow: 0 4px 20px rgba(0,0,0,0.5);">
+            <h3 style="color:#FFE066; text-align:center; margin-top:0; font-size: 1.25rem; text-shadow:0 2px 4px #000;">📜 あなたの四柱推命 精密命式チャート 📜</h3>
+            <div style="text-align:center; color:#CCCCCC; font-size:0.85rem; margin-bottom:8px;">性別: {user_gender}</div>
+            <table class="meishiki-table">
+                <tr>
+                    <th>項目</th>
+                    <th>年柱（祖先・幼少）</th>
+                    <th>月柱（社会・青年）</th>
+                    <th>日柱（自分・本質）</th>
+                    <th>時柱（晩年・子孫）</th>
+                </tr>
+                <tr>
+                    <td style="color:#FFE066;">天干地支</td>
+                    <td>{fp['year_kanto']}</td>
+                    <td>{fp['month_kanto']}</td>
+                    <td class="highlight-nikkan">{fp['day_kanto']}</td>
+                    <td>{fp['hour_kanto']}</td>
+                </tr>
+                <tr>
+                    <td style="color:#FFE066;">通変星</td>
+                    <td>{fp['year_tsuhen']}</td>
+                    <td style="color:#FFD700; background:rgba(255,215,0,0.25);">{fp['month_tsuhen']}</td>
+                    <td style="color:#4EAEFF;">日干（主星）</td>
+                    <td>{fp['hour_tsuhen']}</td>
+                </tr>
+            </table>
+            <div style="text-align:center; color:#E0B0FF; font-size:0.95rem; font-weight:bold;">
+                ✨ あなたの主格: <span style="font-size:1.2rem; color:#FFD700;">【{fp['main_kaku']}格】</span> / 日干: <span style="font-size:1.2rem; color:#FFD700;">【{fp['nikkan']}】</span>（五行: {fp['nikkan_element']}）
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.markdown("<h4 style='color:#FFE066; text-align:center; margin-top:1.5rem; margin-bottom:0.2rem; text-shadow:0 2px 4px #000;'>☯️ 五行エネルギーバランス ☯️</h4>", unsafe_allow_html=True)
+        st.markdown(f"<p style='text-align:center; color:#E0E0E0; font-size:0.85rem; margin-bottom:0;'>※あなたの魂のシンボル（日干: <b>{fp['nikkan_element']}</b>）を頂点（真上）に配置しています</p>", unsafe_allow_html=True)
+        render_wuxing_radar(fp['wuxing_counts'], fp['nikkan_element'])
+
+        st.markdown("<h4 style='color:#FFE066; margin-top:1.2rem; margin-bottom:0.8rem; text-shadow:0 2px 4px #000;'>【本日の四柱推命 開運鑑定】</h4>", unsafe_allow_html=True)
+        
+        lines = [re.sub(r'\*+', '', l).strip() for l in st.session_state.four_pillars_text.split('\n') if l.strip()]
+        for line in lines:
+            line_colored = colorize_lucky_colors(line)
+            
+            if any(line.startswith(prefix) for prefix in ["💖", "💼", "✈️"]):
+                parts = line_colored.split(":", 1)
+                st.markdown(f"""
+                <div class="glass-card-box">
+                    <div style="color:#FFE066; font-size:1.05rem; font-weight:bold; margin-bottom:6px;">{parts[0]}</div>
+                    <div style="color:#FFFFFF; font-size:0.98rem; line-height:1.7; font-weight:600;">{parts[1] if len(parts)>1 else ""}</div>
+                </div>
+                """, unsafe_allow_html=True)
+            elif not line.startswith("【"):
+                st.markdown(f"""
+                <div class="glass-card-box">
+                    <div style="color:#FFFFFF; font-size:0.98rem; line-height:1.7; font-weight:600;">{line_colored}</div>
+                </div>
+                """, unsafe_allow_html=True)
