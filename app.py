@@ -903,7 +903,7 @@ if st.session_state.mode is None:
             st.session_state.mode = "direction_only"; st.rerun()
 
 # ------------------------------------------
-# 🖼️️ モード1: アイコン診断（本来の3ステップ＆4枚スライド画像合成仕様）
+# 🖼 モード1: アイコン診断
 # ------------------------------------------
 elif st.session_state.mode == "diagnosis":
     if st.button("⬅️ モード選択に戻る", use_container_width=True):
@@ -1201,11 +1201,11 @@ elif st.session_state.mode == "diagnosis":
                     status_holder_diag.empty()
 
         if st.session_state.omikuji_text and st.session_state.omikuji_card_image:
-            st.success("⛩️ 今日のおみくじ結果がでました ⛩️ (タップで拡大できます)")
+            st.success("⛩️ 今日のおみくじ結果がでました ⛩️️ (タップで拡大できます)")
             st.image(st.session_state.omikuji_card_image, use_container_width=True)
 
 # ------------------------------------------
-# ⛩️ モード2: 開運おみくじ（おみくじカード画像動的描画＆紙吹雪演出仕様）
+# ⛩️ モード2: 開運おみくじ
 # ------------------------------------------
 elif st.session_state.mode == "omikuji_only":
     st.markdown('<div class="omikuji-heading">⛩️ 開運おみくじ ⛩️</div>', unsafe_allow_html=True)
@@ -1237,7 +1237,7 @@ elif st.session_state.mode == "omikuji_only":
 ※文章中で太字（**）などのマークダウン装飾記号は絶対に使わないでください。
 
 【全体運】
-（運勢の背景にある深い意味と、心構えを2〜3文で味わい深く書いてください）
+（運勢の背景にある深い意味と, 心構えを2〜3文で味わい深く書いてください）
 【仕事・学業運】
 （具体的なアドバイスや成果を出すためのコツを2文程度で書いてください）
 【恋愛・対人運】
@@ -1271,7 +1271,7 @@ elif st.session_state.mode == "omikuji_only":
         st.image(st.session_state.omikuji_card_image, use_container_width=True)
 
 # ------------------------------------------
-# 🧭 モード3: 今日の吉方位診断
+# 🧭 モード3: 今日の吉方位診断（★アドバイスレパートリー50倍強化版★）
 # ------------------------------------------
 elif st.session_state.mode == "direction_only":
     st.markdown('<div class="omikuji-heading">🧭 九星気学・今日の吉方位鑑定 🧭</div>', unsafe_allow_html=True)
@@ -1303,8 +1303,10 @@ elif st.session_state.mode == "direction_only":
                 with status_holder_dir.container():
                     render_video("cat_video2.mp4")
                     with st.spinner("九星気学の盤面を読み解き、本日の吉方位アドバイスを生成中..."):
+                        # ★ レパートリーを50倍に拡張するプロンプト設計 ★
                         prompt_dir = f"""
-あなたは九星気学に精通した知的な陰陽師です。
+あなたは九星気学と陰陽五行説を極めた、非常に知的な陰陽師です。
+ありきたりで抽象的なアドバイスは避け、ユーザーが「なるほど！今日やってみよう」と思える超具体的で新鮮な開運アドバイスを生成してください。
 
 ユーザー情報:
 - 本命星: 『{honmei_sei}』
@@ -1316,23 +1318,38 @@ elif st.session_state.mode == "direction_only":
 本日の吉方位は「{good_str}」、凶方位は「{bad_str}」で確定しています。この決定された吉方位・凶方位のデータを「変更せず」そのまま用いて解説を作成してください。
 ※文章中で太字（**）などのマークダウン装飾記号は絶対に使わないでください。
 
+【アドバイスの多角化・バリエーション拡張ガイドライン】
+吉方位「{good_str}」と本命星「{honmei_sei}」の組み合わせから、以下の【多様なテーマ】の中から本日に最もふさわしい要素をいくつかピックアップし、ランダムかつ具体的にアドバイスに組み込んでください。
+（テーマ例：
+・時間帯別のおすすめ行動（朝の換気、午後のカフェタイム、夜の習慣など）
+・開運フード・ドリンク（味覚、温冷、素材、カフェメニューなど）
+・ラッキーアイテム・ fashion（身につける色、持ち物、小物など）
+・空間・生活環境（部屋の片づけ場所、吉方位に向いたデスク配置など）
+・人間関係・デジタル開運（SNSでの発言、連絡するタイミング、距離感など）
+）
+
 【出力フォーマット】
 【最高吉方位解説】
-[確定吉方位({good_str})の理由と運気アップのための過ごし方解説]
+[確定吉方位({good_str})のエネルギー解説と、本日吉方位のパワーを最大限に吸収するための具体的でユニークな行動（2〜3文）]
 
 【項目別アドバイス】
-💖 恋愛・対人運: [アドバイス内容]
-💼 仕事・学業運: [アドバイス内容]
-✈️ 旅行・お出かけ運: [アドバイス内容]
-🏠 引っ越し・模様替え運: [アドバイス内容]
+💖 恋愛・対人運: [人間関係の距離感やコミュニケーションの切り口、開運アドバイス]
+💼 仕事・学業運: [集中力・決断力を高める具体的行動や吉方位デスク活用・デジタル開運法]
+✈️ 旅行・お出かけ運: [吉方位への移動、ラッキーフード・ラッキースポット、移動中の過ごし方]
+🏠 暮らし・開運アクション: [身につけるカラー・アイテム、部屋での過ごし方や開運習慣]
 
 【陰陽師からのメッセージ】
-[心温まる・知的なひとことメッセージ]
+[知性と温かみがあり、ハッとさせられるような特別なメッセージ]
 """
                         client = genai.Client(api_key=active_key)
+                        
+                        # 生成の多様性を高める設定（temperature: 1.0）
                         response_dir = client.models.generate_content(
                             model=GEMINI_MODEL_NAME,
-                            contents=prompt_dir
+                            contents=prompt_dir,
+                            config=types.GenerateContentConfig(
+                                temperature=1.0
+                            )
                         )
                         st.session_state.direction_result_text = response_dir.text
                         st.session_state.exact_good_dirs = exact_good_dirs
@@ -1420,7 +1437,7 @@ elif st.session_state.mode == "four_pillars":
     if selected_hour_str != "不明":
         hour_val = int(selected_hour_str.split(":")[0])
 
-    if st.button("☯️ 命式を解読して鑑定する ☯️", type="primary", use_container_width=True):
+    if st.button("☯️️ 命式を解読して鑑定する ☯️", type="primary", use_container_width=True):
         active_key = get_api_key()
         if not active_key:
             st.error(".env ファイルに GEMINI_API_KEY を設定するか、API Key を確認してください。")
