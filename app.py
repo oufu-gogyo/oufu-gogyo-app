@@ -410,10 +410,11 @@ GAN_WU_XING = {"甲": "木", "乙": "木", "丙": "火", "丁": "火", "戊": "�
 ZHI_WU_XING = {"子": "水", "丑": "土", "寅": "木", "卯": "木", "辰": "土", "巳": "火", "午": "火", "未": "土", "申": "金", "酉": "金", "戌": "土", "亥": "水"}
 WU_XING_CLASS = {"木": "wx-wood", "火": "wx-fire", "土": "wx-earth", "金": "wx-metal", "水": "wx-water"}
 
+# 蔵干（本気）定義テーブル
 ZHI_ZOUGAN_HONKI = {
     "子": "癸", "丑": "己", "寅": "甲", "卯": "乙",
     "辰": "戊", "巳": "丙", "午": "丁", "未": "己",
-    "申": "庚", "酉": "辛", "戌": "辛", "亥": "壬"
+    "申": "庚", "酉": "辛", "戌": "戊", "亥": "壬"
 }
 
 NINE_STARS = ["一白水星", "二黒土星", "三碧木星", "四緑木星", "五黄土星", "六白金星", "七赤金星", "八白土星", "九紫火星"]
@@ -656,12 +657,49 @@ def generate_omikuji_card_image(fortune_type, omikuji_raw_text):
     draw.text((card_w // 2, 1655), "--- 陰陽SNSアイコン診断 & 開運おみくじ ---", font=footer_font, fill=(160, 170, 190), anchor="mm")
     return card
 
+# ── 精密・節入り日時データベース（万年暦テーブル方式） ──
+SETSUIRI_DATABASE = {
+    1990: {
+        1: datetime.datetime(1990, 1, 6, 0, 12),   # 小寒
+        2: datetime.datetime(1990, 2, 4, 11, 14),  # 立春
+        3: datetime.datetime(1990, 3, 6, 5, 10),   # 啓蟄
+        4: datetime.datetime(1990, 4, 5, 10, 5),   # 清明
+        5: datetime.datetime(1990, 5, 6, 3, 36),   # 立夏
+        6: datetime.datetime(1990, 6, 6, 7, 43),   # 芒種
+        7: datetime.datetime(1990, 7, 7, 18, 1),   # 小暑
+        8: datetime.datetime(1990, 8, 8, 3, 44),   # 立秋
+        9: datetime.datetime(1990, 9, 8, 6, 39),   # 白露
+        10: datetime.datetime(1990, 10, 8, 22, 12),# 寒露
+        11: datetime.datetime(1990, 11, 7, 21, 23),# 立冬
+        12: datetime.datetime(1990, 12, 7, 13, 58) # 大雪
+    }
+}
+
+def get_exact_setsuiri_datetime(year: int, month: int) -> datetime.datetime:
+    """万年暦データベースから節入り日時を取得（未定義の年は平均的な標準値を返すフォールバック）"""
+    if year in SETSUIRI_DATABASE and month in SETSUIRI_DATABASE[year]:
+        return SETSUIRI_DATABASE[year][month]
+    
+    default_days = {1: (6, 0), 2: (4, 0), 3: (6, 0), 4: (5, 0), 5: (6, 0), 6: (6, 0), 7: (7, 0), 8: (8, 0), 9: (8, 0), 10: (8, 0), 11: (7, 0), 12: (7, 0)}
+    day, hour = default_days.get(month, (8, 0))
+    return datetime.datetime(year, month, day, hour, 0)
+
 # ── 四柱推命計算関数 ──
 HOUR_ZHI_MAP = [
     (23, 1, "子"), (1, 3, "丑"), (3, 5, "寅"), (5, 7, "卯"),
     (7, 9, "辰"), (9, 11, "巳"), (11, 13, "午"), (13, 15, "未"),
     (15, 17, "申"), (17, 19, "酉"), (19, 21, "戌"), (21, 23, "亥")
 ]
+
+# 五虎遁月法ルックアップテーブル（正確な節月構造版）
+# 節月 1=寅(2月), 2=卯(3月), 3=辰(4月), 4=巳(5月), 5=午(6月), 6=未(7月), 7=申(8月), 8=酉(9月), 9=戌(10月), 10=亥(11月), 11=子(12月), 12=丑(1月)
+GOKO_TONGETSU_MAP = {
+    0: {1: "丙", 2: "丁", 3: "戊", 4: "己", 5: "庚", 6: "辛", 7: "壬", 8: "癸", 9: "甲", 10: "乙", 11: "丙", 12: "丁"}, # 甲・己年
+    1: {1: "戊", 2: "己", 3: "庚", 4: "辛", 5: "壬", 6: "癸", 7: "甲", 8: "乙", 9: "丙", 10: "丁", 11: "戊", 12: "己"}, # 乙・庚年 (7月節(申)=甲)
+    2: {1: "庚", 2: "辛", 3: "壬", 4: "癸", 5: "甲", 6: "乙", 7: "丙", 8: "丁", 9: "戊", 10: "己", 11: "庚", 12: "辛"}, # 丙・辛年
+    3: {1: "壬", 2: "癸", 3: "甲", 4: "乙", 5: "丙", 6: "丁", 7: "戊", 8: "己", 9: "庚", 10: "辛", 11: "壬", 12: "癸"}, # 丁・壬年
+    4: {1: "甲", 2: "乙", 3: "丙", 4: "丁", 5: "戊", 6: "己", 7: "庚", 8: "辛", 9: "壬", 10: "癸", 11: "甲", 12: "乙"}  # 戊・癸年
+}
 
 def get_hour_zhi(hour_val):
     if hour_val is None: return None
@@ -673,30 +711,58 @@ def get_hour_zhi(hour_val):
     return "子"
 
 def calculate_four_pillars(dt: datetime.date, hour_val=None):
+    birth_hour = hour_val if hour_val is not None else 12
+    birth_dt = datetime.datetime(dt.year, dt.month, dt.day, birth_hour, 0)
+    
+    # 1. 日柱（日干・日支）
     base_date = datetime.date(1900, 1, 1)
     diff = (dt - base_date).days
-    
     day_gan_idx = (0 + diff) % 10
     day_zhi_idx = (10 + diff) % 12
     day_gan = TIAN_GAN[day_gan_idx]
     day_zhi = DI_ZHI[day_zhi_idx]
     
-    year = dt.year
-    if dt < datetime.date(year, 2, 4):
-        year -= 1
-    year_gan_idx = (year - 4) % 10
-    year_zhi_idx = (year - 4) % 12
+    # 2. 年柱（年干・年支）：立春の正確な日時と比較
+    risshun_dt = get_exact_setsuiri_datetime(dt.year, 2)
+    calc_year = dt.year
+    if birth_dt < risshun_dt:
+        calc_year -= 1
+        
+    year_gan_idx = (calc_year - 4) % 10
+    year_zhi_idx = (calc_year - 4) % 12
     year_gan = TIAN_GAN[year_gan_idx]
     year_zhi = DI_ZHI[year_zhi_idx]
     
-    month = dt.month
-    if dt.day < 5: month -= 1
-    if month < 1: month = 12
-    month_zhi_idx = (month + 1) % 12
-    month_gan_idx = (year_gan_idx * 2 + month) % 10
-    month_gan = TIAN_GAN[month_gan_idx]
-    month_zhi = DI_ZHI[month_zhi_idx]
+    # 3. 月柱（月干・月支）：当月の正確な節入り日時と比較
+    current_setsu_dt = get_exact_setsuiri_datetime(dt.year, dt.month)
     
+    if birth_dt >= current_setsu_dt:
+        setsu_month_num = dt.month
+    else:
+        setsu_month_num = dt.month - 1
+        if setsu_month_num < 1:
+            setsu_month_num = 12
+
+    # カレンダー月(1〜12月)から節月インデックス(1=寅月〜12=丑月)へのマッピング
+    CALENDAR_TO_SETSU_IDX = {
+        2: 1, 3: 2, 4: 3, 5: 4, 6: 5, 7: 6,
+        8: 7, 9: 8, 10: 9, 11: 10, 12: 11, 1: 12
+    }
+    setsu_idx = CALENDAR_TO_SETSU_IDX[setsu_month_num]
+
+    # 節月インデックス(1=寅~12=丑)から月支インデックス(2=寅~1=丑)へのマッピング
+    SETSU_TO_ZHI_IDX = {
+        1: 2, 2: 3, 3: 4, 4: 5, 5: 6, 6: 7,
+        7: 8, 8: 9, 9: 10, 10: 11, 11: 0, 12: 1
+    }
+    month_zhi_idx = SETSU_TO_ZHI_IDX[setsu_idx]
+    month_zhi = DI_ZHI[month_zhi_idx]
+
+    # 五虎遁月法（月干計算）
+    gan_group = year_gan_idx % 5
+    month_gan = GOKO_TONGETSU_MAP[gan_group][setsu_idx]
+    
+    # 4. 時柱
     hour_gan, hour_zhi, tsuhen_hour = "不明", "不明", "不明"
     if hour_val is not None:
         hour_zhi = get_hour_zhi(hour_val)
@@ -706,9 +772,11 @@ def calculate_four_pillars(dt: datetime.date, hour_val=None):
         hour_gan = TIAN_GAN[hour_gan_idx]
         tsuhen_hour = TSUHEN_MAP[day_gan][hour_gan]
     
+    # 通変星・格の計算
     tsuhen_year = TSUHEN_MAP[day_gan][year_gan]
     tsuhen_month = TSUHEN_MAP[day_gan][month_gan]
     
+    # 月支蔵干（本気）から主格を判定
     month_zougan_honki = ZHI_ZOUGAN_HONKI[month_zhi]
     main_kaku = TSUHEN_MAP[day_gan][month_zougan_honki]
 
@@ -1201,7 +1269,7 @@ elif st.session_state.mode == "diagnosis":
                     status_holder_diag.empty()
 
         if st.session_state.omikuji_text and st.session_state.omikuji_card_image:
-            st.success("⛩️ 今日のおみくじ結果がでました ⛩️️ (タップで拡大できます)")
+            st.success("⛩️ 今日のおみくじ結果がでました ⛩️ (タップで拡大できます)")
             st.image(st.session_state.omikuji_card_image, use_container_width=True)
 
 # ------------------------------------------
@@ -1237,7 +1305,7 @@ elif st.session_state.mode == "omikuji_only":
 ※文章中で太字（**）などのマークダウン装飾記号は絶対に使わないでください。
 
 【全体運】
-（運勢の背景にある深い意味と, 心構えを2〜3文で味わい深く書いてください）
+（運勢の背景にある深い意味と、心構えを2〜3文で味わい深く書いてください）
 【仕事・学業運】
 （具体的なアドバイスや成果を出すためのコツを2文程度で書いてください）
 【恋愛・対人運】
@@ -1271,7 +1339,7 @@ elif st.session_state.mode == "omikuji_only":
         st.image(st.session_state.omikuji_card_image, use_container_width=True)
 
 # ------------------------------------------
-# 🧭 モード3: 今日の吉方位診断（★アドバイスレパートリー50倍強化版★）
+# 🧭 モード3: 今日の吉方位診断（レパートリー50倍強化版）
 # ------------------------------------------
 elif st.session_state.mode == "direction_only":
     st.markdown('<div class="omikuji-heading">🧭 九星気学・今日の吉方位鑑定 🧭</div>', unsafe_allow_html=True)
@@ -1303,7 +1371,6 @@ elif st.session_state.mode == "direction_only":
                 with status_holder_dir.container():
                     render_video("cat_video2.mp4")
                     with st.spinner("九星気学の盤面を読み解き、本日の吉方位アドバイスを生成中..."):
-                        # ★ レパートリーを50倍に拡張するプロンプト設計 ★
                         prompt_dir = f"""
 あなたは九星気学と陰陽五行説を極めた、非常に知的な陰陽師です。
 ありきたりで抽象的なアドバイスは避け、ユーザーが「なるほど！今日やってみよう」と思える超具体的で新鮮な開運アドバイスを生成してください。
@@ -1343,7 +1410,6 @@ elif st.session_state.mode == "direction_only":
 """
                         client = genai.Client(api_key=active_key)
                         
-                        # 生成の多様性を高める設定（temperature: 1.0）
                         response_dir = client.models.generate_content(
                             model=GEMINI_MODEL_NAME,
                             contents=prompt_dir,
@@ -1412,7 +1478,7 @@ elif st.session_state.mode == "direction_only":
                 """, unsafe_allow_html=True)
 
 # ------------------------------------------
-# 📜 モード4: 四柱推命・本命命式鑑定
+# 📜 モード4: 四柱推命・本命命式鑑定（万年暦テーブル方式対応版）
 # ------------------------------------------
 elif st.session_state.mode == "four_pillars":
     st.markdown('<div class="omikuji-heading">📜 四柱推命・本命命式＆開運鑑定 📜</div>', unsafe_allow_html=True)
@@ -1437,7 +1503,7 @@ elif st.session_state.mode == "four_pillars":
     if selected_hour_str != "不明":
         hour_val = int(selected_hour_str.split(":")[0])
 
-    if st.button("☯️️ 命式を解読して鑑定する ☯️", type="primary", use_container_width=True):
+    if st.button("☯️ 命式を解読して鑑定する ☯️", type="primary", use_container_width=True):
         active_key = get_api_key()
         if not active_key:
             st.error(".env ファイルに GEMINI_API_KEY を設定するか、API Key を確認してください。")
@@ -1472,22 +1538,29 @@ elif st.session_state.mode == "four_pillars":
 ※マークダウンの太字（**）は使用禁止。
 性別（{gender}）およびメイン属性「{fp_data['main_kaku']}格」を含めた高精度な命式データから、四柱推命の観点で深く知性あふれる本日のアドバイスを作成してください。
 
+【ラッキーカラー＆開運アクション拡張ガイドライン】
+・ラッキーカラーは「固定表記（エメラルドグリーン等）」にせず、日干「{fp_data['nikkan_element']}」と本日の運気バランス（補うべき五行エネルギー）から導き出される最適な色（例: シャンパンゴールド、ターコイズブルー、ラベンダー、ワインレッド、ロイヤルブルー、アースブラウン、ローズピンク等）を2色動的に選出して提示してください。
+・開運アクションは抽象的な精神論を避け、本日すぐ実践できる【具体的・多角的な行動】（例：時間帯別の過ごし方、開運フード・カフェ、身につける小物、デスク周りの環境整理、デジタル・AI活用術、言葉遣いや意識）を盛り込んでください。
+
 【本日の全体運＆開運ポイント】
 [日干「{fp_data['nikkan']}」および「{fp_data['main_kaku']}格」の本質から見る、本日絶好調な点と注意すべきポイント（2-3文）]
 
 【項目別詳細運勢】
-💖 恋愛・対人運: [{gender}の視点も含めた対人アドバイス]
-💼 仕事・学業運: [アドバイス内容]
-✈️ 旅行・お出かけ運: [アドバイス内容]
+💖 恋愛・対人運: [{gender}の視点も含めた対人関係やコミュニケーションの具体的アドバイス]
+💼 仕事・学業運: [集中力・決断力を高める具体的行動、PC・AI活用や業務上の開運テクニック]
+✈️ 旅行・お出かけ運: [お出かけ時の心構え、巡るべきラッキースポットや移動中の開運法]
 
 【本日の開運キーアイテム】
-・ラッキーカラー：エメラルドグリーン、ゴールド
-・開運アクション：[幸運を引き寄せる具体的な行動]
+・ラッキーカラー：[日干と本日の五行から導く最適な2色]
+・開運アクション：[本日即実践できる具体的でユニークな開運行動]
 """
                         client = genai.Client(api_key=active_key)
                         response_fp = client.models.generate_content(
                             model=GEMINI_MODEL_NAME,
-                            contents=prompt_fp
+                            contents=prompt_fp,
+                            config=types.GenerateContentConfig(
+                                temperature=1.0
+                            )
                         )
                         st.session_state.four_pillars_text = response_fp.text
                         st.session_state.fp_data = fp_data
