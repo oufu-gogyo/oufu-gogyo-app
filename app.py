@@ -440,7 +440,7 @@ TSUHEN_MAP = {
     "甲": {"甲": "比肩", "乙": "劫財", "丙": "食神", "丁": "傷官", "戊": "偏財", "己": "正財", "庚": "偏官", "辛": "正官", "壬": "偏印", "癸": "印綬"},
     "乙": {"甲": "劫財", "乙": "比肩", "丙": "傷官", "丁": "食神", "戊": "正財", "己": "偏財", "庚": "正官", "辛": "偏官", "壬": "印綬", "癸": "偏印"},
     "丙": {"甲": "偏印", "乙": "印綬", "丙": "比肩", "丁": "劫財", "戊": "食神", "己": "傷官", "庚": "偏財", "辛": "正財", "壬": "偏官", "癸": "正官"},
-    "丁": {"甲": "印綬", "乙": "偏印", "丙": "劫財", "丁": "比肩", "戊": "傷官", "己": "食神", "庚": "正財", "辛": "偏財", "壬": "正官", "癸": "偏官"},
+    "丁": {"甲": "印綬", "乙": "偏印", "丙": "劫財", "丁": "比肩", "戊": "傷官", "己": "食神", "庚": "正財", "辛": "偏財", "壬": "偏官", "癸": "偏官"},
     "戊": {"甲": "偏官", "乙": "正官", "丙": "偏印", "丁": "印綬", "戊": "比肩", "己": "劫財", "庚": "食神", "辛": "傷官", "壬": "偏財", "癸": "正財"},
     "己": {"甲": "正官", "乙": "偏官", "丙": "印綬", "丁": "偏印", "戊": "劫財", "己": "比肩", "庚": "傷官", "辛": "食神", "壬": "正財", "癸": "偏財"},
     "庚": {"甲": "偏財", "乙": "正財", "丙": "偏官", "丁": "正官", "戊": "偏印", "己": "印綬", "庚": "比肩", "辛": "劫財", "壬": "食神", "癸": "傷官"},
@@ -811,8 +811,11 @@ def get_honmei_sei(birth_date: datetime.date) -> str:
     year = birth_date.year
     if birth_date < datetime.date(year, 2, 4):
         year -= 1
-    remainder = (11 - (year % 9)) % 9
-    return NINE_STARS[remainder]
+    rem = year % 9
+    star_num = 11 - rem
+    if star_num > 9:
+        star_num -= 9
+    return NINE_STARS[star_num - 1]
 
 def get_day_star(dt: datetime.date) -> str:
     base_date = datetime.date(2024, 1, 1)
@@ -954,20 +957,20 @@ if st.session_state.mode is None:
 
     col_1, col_2 = st.columns(2)
     with col_1:
-        if st.button("🖼️ SNSアイコン診断", type="secondary", use_container_width=True):
+        if st.button("🖼️ SNSアイコン診断🖼️ ", type="secondary", use_container_width=True):
             st.session_state.mode = "diagnosis"
             st.session_state.step = 0; st.rerun()
     with col_2:
-        if st.button("📜 四柱推命・本命命式鑑定", type="secondary", use_container_width=True):
+        if st.button("📜 四柱推命鑑定📜", type="secondary", use_container_width=True):
             st.session_state.mode = "four_pillars"
             st.rerun()
 
     col_3, col_4 = st.columns(2)
     with col_3:
-        if st.button("⛩️ 開運おみくじ", type="secondary", use_container_width=True):
+        if st.button("⛩️ 開運おみくじ⛩️", type="secondary", use_container_width=True):
             st.session_state.mode = "omikuji_only"; st.rerun()
     with col_4:
-        if st.button("🧭 今日の吉方位診断", type="secondary", use_container_width=True):
+        if st.button("🧭 今日の吉方位🧭", type="secondary", use_container_width=True):
             st.session_state.mode = "direction_only"; st.rerun()
 
 # ------------------------------------------
@@ -1342,7 +1345,7 @@ elif st.session_state.mode == "omikuji_only":
 # 🧭 モード3: 今日の吉方位診断（レパートリー50倍強化版）
 # ------------------------------------------
 elif st.session_state.mode == "direction_only":
-    st.markdown('<div class="omikuji-heading">🧭 九星気学・今日の吉方位鑑定 🧭</div>', unsafe_allow_html=True)
+    st.markdown('<div class="omikuji-heading">🧭 今日の吉方位鑑定 🧭</div>', unsafe_allow_html=True)
     if st.button("⬅️ 最初に戻る", use_container_width=True):
         st.session_state.mode = None
         st.session_state.direction_result_text = None
@@ -1369,11 +1372,22 @@ elif st.session_state.mode == "direction_only":
 
                 status_holder_dir = st.empty()
                 with status_holder_dir.container():
-                    render_video("cat_video2.mp4")
+                    render_video("cat_video6.mp4")
                     with st.spinner("九星気学の盤面を読み解き、本日の吉方位アドバイスを生成中..."):
+                        # 多彩なアドバイス切り口（毎回ランダムに視点を切り替えてバリエーションを無限化）
+                        angles = [
+                            "【五感と感性】吉方位の気の流れを感じるための香りの取り入れ方、音楽・サウンド、肌触り、景色、舌で感じる味覚に特化して解説してください。",
+                            "【マインドフルネス＆メンタル整律】吉方位の持つ心理的心理・氣の整え方、思考の整理術、瞑想や深呼吸、自己肯定感を高める言葉に特化して解説してください。",
+                            "【デジタル＆ライフハック】スマホやPCの壁紙、SNS投稿のタイミング、メッセージの絵文字、吉方位のデスク環境整備に特化して解説してください。",
+                            "【行動経済＆開運アクション】日常のちょっとした買い物、コンビニでの選び方、吉方位にあるカフェや立ち寄りスポット、運気を引き寄せる時間の使い方に特化して解説してください。",
+                            "【身体と健康・身だしなみ】吉方位の気を受け取るためのストレッチ、身につけるアクセサリや服の質感、持ち物の整理、体調管理に特化して解説してください。"
+                        ]
+                        chosen_angle = random.choice(angles)
+
                         prompt_dir = f"""
 あなたは九星気学と陰陽五行説を極めた、非常に知的な陰陽師です。
-ありきたりで抽象的なアドバイスは避け、ユーザーが「なるほど！今日やってみよう」と思える超具体的で新鮮な開運アドバイスを生成してください。
+固定観念やステレオタイプな提案（毎回同じようなカフェや換気の提案など）は固く禁止します。
+鑑定ごとに全く異なる驚きと発見のある、超具体的かつ独創的な開運アドバイスを生成してください。
 
 ユーザー情報:
 - 本命星: 『{honmei_sei}』
@@ -1381,19 +1395,13 @@ elif st.session_state.mode == "direction_only":
 - 確定吉方位: 『{good_str}』
 - 確定凶方位: 『{bad_str}』
 
+【本日の特別鑑定切り口】
+本日のアドバイスは、特に以下の視点・テーマを深く掘り下げて生成してください：
+{chosen_angle}
+
 【絶対指示】
 本日の吉方位は「{good_str}」、凶方位は「{bad_str}」で確定しています。この決定された吉方位・凶方位のデータを「変更せず」そのまま用いて解説を作成してください。
 ※文章中で太字（**）などのマークダウン装飾記号は絶対に使わないでください。
-
-【アドバイスの多角化・バリエーション拡張ガイドライン】
-吉方位「{good_str}」と本命星「{honmei_sei}」の組み合わせから、以下の【多様なテーマ】の中から本日に最もふさわしい要素をいくつかピックアップし、ランダムかつ具体的にアドバイスに組み込んでください。
-（テーマ例：
-・時間帯別のおすすめ行動（朝の換気、午後のカフェタイム、夜の習慣など）
-・開運フード・ドリンク（味覚、温冷、素材、カフェメニューなど）
-・ラッキーアイテム・ fashion（身につける色、持ち物、小物など）
-・空間・生活環境（部屋の片づけ場所、吉方位に向いたデスク配置など）
-・人間関係・デジタル開運（SNSでの発言、連絡するタイミング、距離感など）
-）
 
 【出力フォーマット】
 【最高吉方位解説】
@@ -1481,7 +1489,7 @@ elif st.session_state.mode == "direction_only":
 # 📜 モード4: 四柱推命・本命命式鑑定（万年暦テーブル方式対応版）
 # ------------------------------------------
 elif st.session_state.mode == "four_pillars":
-    st.markdown('<div class="omikuji-heading">📜 四柱推命・本命命式＆開運鑑定 📜</div>', unsafe_allow_html=True)
+    st.markdown('<div class="omikuji-heading">📜 四柱推命鑑定 📜</div>', unsafe_allow_html=True)
     if st.button("⬅️ 最初に戻る", use_container_width=True):
         st.session_state.mode = None
         st.session_state.four_pillars_text = None
@@ -1518,7 +1526,7 @@ elif st.session_state.mode == "four_pillars":
 
                 status_holder_fp = st.empty()
                 with status_holder_fp.container():
-                    render_video("cat_video2.mp4")
+                    render_video("cat_video5.mp4")
                     with st.spinner("四柱推命の盤面と時柱・五行バランスを解析中..."):
                         prompt_fp = f"""
 あなたは四柱推命の真髄を極めた知的な陰陽師です。
