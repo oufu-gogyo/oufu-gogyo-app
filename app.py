@@ -351,13 +351,20 @@ if img_base64:
             text-align: center;
         }
         .compass-cell.center { background: rgba(255, 215, 0, 0.22); border-color: #FFD700; }
-        .compass-cell.good { background: rgba(50, 205, 50, 0.25); border-color: #55FF55; }
-        .compass-cell.bad { background: rgba(255, 69, 0, 0.25); border-color: #FF6666; }
+        .compass-cell.daikichi { background: rgba(50, 205, 50, 0.3); border-color: #55FF55; }
+        .compass-cell.kichi { background: rgba(30, 144, 255, 0.3); border-color: #33AAFF; }
+        .compass-cell.kikyo { background: rgba(255, 215, 0, 0.2); border-color: #FFDD44; }
+        .compass-cell.kyo { background: rgba(255, 140, 0, 0.3); border-color: #FF9933; }
+        .compass-cell.daikyo { background: rgba(255, 69, 0, 0.35); border-color: #FF4444; }
+
         .compass-title { font-size: 0.72rem; color: #CCCCCC; margin-bottom: 2px; }
         .compass-dir { font-size: 0.95rem; font-weight: bold; color: #FFFFFF; }
         .compass-status { font-size: 0.85rem; font-weight: bold; margin-top: 2px; }
-        .status-good { color: #55FF55; text-shadow: 0 0 6px rgba(85,255,85,0.8); }
-        .status-bad { color: #FF6666; text-shadow: 0 0 6px rgba(255,102,102,0.8); }
+        .status-daikichi { color: #55FF55; text-shadow: 0 0 6px rgba(85,255,85,0.8); }
+        .status-kichi { color: #33AAFF; text-shadow: 0 0 6px rgba(51,170,255,0.8); }
+        .status-kikyo { color: #FFDD44; text-shadow: 0 0 6px rgba(255,221,68,0.8); }
+        .status-kyo { color: #FF9933; text-shadow: 0 0 6px rgba(255,153,51,0.8); }
+        .status-daikyo { color: #FF4444; text-shadow: 0 0 6px rgba(255,68,68,0.8); }
         .status-center { color: #FFE066; }
         
         .wx-wood { color: #55FF55 !important; font-weight: bold; }
@@ -695,7 +702,7 @@ HOUR_ZHI_MAP = [
 # 節月 1=寅(2月), 2=卯(3月), 3=辰(4月), 4=巳(5月), 5=午(6月), 6=未(7月), 7=申(8月), 8=酉(9月), 9=戌(10月), 10=亥(11月), 11=子(12月), 12=丑(1月)
 GOKO_TONGETSU_MAP = {
     0: {1: "丙", 2: "丁", 3: "戊", 4: "己", 5: "庚", 6: "辛", 7: "壬", 8: "癸", 9: "甲", 10: "乙", 11: "丙", 12: "丁"}, # 甲・己年
-    1: {1: "戊", 2: "己", 3: "庚", 4: "辛", 5: "壬", 6: "癸", 7: "甲", 8: "乙", 9: "丙", 10: "丁", 11: "戊", 12: "己"}, # 乙・庚年 (7月節(申)=甲)
+    1: {1: "戊", 2: "己", 3: "庚", 4: "辛", 5: "壬", 6: "癸", 7: "甲", 8: "乙", 9: "丙", 10: "丁", 11: "戊", 12: "己"}, # 乙・庚年
     2: {1: "庚", 2: "辛", 3: "壬", 4: "癸", 5: "甲", 6: "乙", 7: "丙", 8: "丁", 9: "戊", 10: "己", 11: "庚", 12: "辛"}, # 丙・辛年
     3: {1: "壬", 2: "癸", 3: "甲", 4: "乙", 5: "丙", 6: "丁", 7: "戊", 8: "己", 9: "庚", 10: "辛", 11: "壬", 12: "癸"}, # 丁・壬年
     4: {1: "甲", 2: "乙", 3: "丙", 4: "丁", 5: "戊", 6: "己", 7: "庚", 8: "辛", 9: "壬", 10: "癸", 11: "甲", 12: "乙"}  # 戊・癸年
@@ -817,13 +824,61 @@ def get_honmei_sei(birth_date: datetime.date) -> str:
         star_num -= 9
     return NINE_STARS[star_num - 1]
 
-def get_day_star(dt: datetime.date) -> str:
-    base_date = datetime.date(2024, 1, 1)
-    diff = (dt - base_date).days
-    remainder = (0 - diff) % 9
-    return NINE_STARS[remainder]
+def get_year_star(dt: datetime.date) -> str:
+    year = dt.year
+    if dt < datetime.date(year, 2, 4):
+        year -= 1
+    rem = year % 9
+    star_num = 11 - rem
+    if star_num > 9:
+        star_num -= 9
+    return NINE_STARS[star_num - 1]
 
-def get_day_board(center_star: str) -> dict:
+def get_month_star(dt: datetime.date) -> str:
+    year_star = get_year_star(dt)
+    y_idx = NINE_STARS.index(year_star)
+    base_month_stars = [8, 7, 6, 5, 4, 3, 2, 1, 0, 8, 7, 6]
+    m_idx = (dt.month - 2) % 12
+    return NINE_STARS[(base_month_stars[m_idx] - (y_idx % 3) * 3) % 9]
+
+# 陽遁・陰遁切替テーブル（一般的な暦の甲子日・節気起点）
+YONTON_INTON_TABLE = [
+    (datetime.date(2023, 12, 31), 'yonton', 0), # 2023/12/31 甲子 -> 陽遁一白水星
+    (datetime.date(2024, 6, 28),  'inton',  8), # 2024/06/28 甲子 -> 陰遁九紫火星
+    (datetime.date(2024, 12, 25), 'yonton', 0), # 2024/12/25 甲子 -> 陽遁一白水星
+    (datetime.date(2025, 6, 23),  'inton',  8), # 2025/06/23 甲子 -> 陰遁九紫火星
+    (datetime.date(2025, 12, 20), 'yonton', 0), # 2025/12/20 甲子 -> 陽遁一白水星
+    (datetime.date(2026, 6, 18),  'inton',  8), # 2026/06/18 甲子 -> 陰遁九紫火星
+    (datetime.date(2026, 10, 17), 'yonton', 5), # 2026/10/17 甲子 -> 陽遁六白金星 ★標準暦一致用
+    (datetime.date(2026, 12, 15), 'yonton', 0), # 2026/12/15 甲子 -> 陽遁一白水星
+    (datetime.date(2027, 6, 13),  'inton',  8), # 2027/06/13 甲子 -> 陰遁九紫火星
+]
+
+def get_day_star(dt: datetime.date) -> str:
+    active_switch = None
+    for entry in YONTON_INTON_TABLE:
+        if dt >= entry[0]:
+            active_switch = entry
+        else:
+            break
+            
+    if active_switch is None:
+        ref_date = datetime.date(2023, 12, 31)
+        diff = (dt - ref_date).days
+        star_idx = (0 + diff) % 9
+        return NINE_STARS[star_idx]
+
+    start_date, mode, start_star_idx = active_switch
+    diff_days = (dt - start_date).days
+
+    if mode == 'yonton':
+        star_idx = (start_star_idx + diff_days) % 9
+    else:
+        star_idx = (start_star_idx - diff_days) % 9
+
+    return NINE_STARS[star_idx]
+
+def get_board_for_star(center_star: str) -> dict:
     center_idx = NINE_STARS.index(center_star)
     offsets = {"北": 4, "北東": 7, "東": 2, "南東": 3, "南": 8, "南西": 1, "西": 5, "北西": 6}
     board = {}
@@ -832,68 +887,103 @@ def get_day_board(center_star: str) -> dict:
         board[d] = NINE_STARS[star_idx]
     return board
 
-def calculate_exact_directions(birth_date: datetime.date, target_date: datetime.date):
+def calculate_exact_directions(birth_date: datetime.date, target_date: datetime.date, mode_strict: bool = False):
     honmei_sei = get_honmei_sei(birth_date)
     user_element = STAR_ELEMENTS[honmei_sei]
     
+    # 日盤
     day_center = get_day_star(target_date)
-    board = get_day_board(day_center)
-    
-    good_dirs = []
-    bad_dirs = []
-    
-    goou_dir = None
-    for d, s in board.items():
-        if s == "五黄土星":
-            goou_dir = d
-            break
-            
-    anken_dir = OPPOSITE_DIR.get(goou_dir) if goou_dir else None
-    
-    honmei_dir = None
-    for d, s in board.items():
-        if s == honmei_sei:
-            honmei_dir = d
-            break
-            
-    teki_dir = OPPOSITE_DIR.get(honmei_dir) if honmei_dir else None
+    day_board = get_board_for_star(day_center)
 
-    for d, star in board.items():
-        if d in [goou_dir, anken_dir, honmei_dir, teki_dir]:
-            bad_dirs.append(d)
-            continue
-            
+    # 年盤・月盤（厳密モード用）
+    year_center = get_year_star(target_date)
+    year_board = get_board_for_star(year_center)
+    month_center = get_month_star(target_date)
+    month_board = get_board_for_star(month_center)
+
+    # 日盤の凶方位抽出
+    goou_dir_day = next((d for d, s in day_board.items() if s == "五黄土星"), None)
+    anken_dir_day = OPPOSITE_DIR.get(goou_dir_day) if goou_dir_day else None
+    honmei_dir_day = next((d for d, s in day_board.items() if s == honmei_sei), None)
+    teki_dir_day = OPPOSITE_DIR.get(honmei_dir_day) if honmei_dir_day else None
+
+    # 年盤・月盤の凶方位抽出（厳密モード用）
+    daikyo_dirs_all = set()
+    if goou_dir_day: daikyo_dirs_all.add(goou_dir_day)
+    if anken_dir_day: daikyo_dirs_all.add(anken_dir_day)
+
+    if mode_strict:
+        y_goou = next((d for d, s in year_board.items() if s == "五黄土星"), None)
+        if y_goou: daikyo_dirs_all.add(y_goou); daikyo_dirs_all.add(OPPOSITE_DIR.get(y_goou))
+        m_goou = next((d for d, s in month_board.items() if s == "五黄土星"), None)
+        if m_goou: daikyo_dirs_all.add(m_goou); daikyo_dirs_all.add(OPPOSITE_DIR.get(m_goou))
+
+    dir_status = {}
+    daikichi_dirs = []
+    kichi_dirs = []
+    kikyo_dirs = []
+    kyo_dirs = []
+    daikyo_dirs = []
+
+    for d, star in day_board.items():
         star_elem = STAR_ELEMENTS[star]
-        if star_elem == user_element or star_elem in SOSEI_MAP[user_element]:
-            good_dirs.append(d)
+        
+        # 1. 大凶方位（五黄殺・暗剣殺）
+        if d in daikyo_dirs_all:
+            dir_status[d] = "大凶 ❌"
+            daikyo_dirs.append(d)
+        # 2. 凶方位（本命殺・本命的殺）
+        elif d in [honmei_dir_day, teki_dir_day]:
+            dir_status[d] = "凶 ⚠️"
+            kyo_dirs.append(d)
+        # 3. 大吉（生気・退気：相生関係で運気を強く高める）
+        elif star_elem in SOSEI_MAP[user_element]:
+            dir_status[d] = "大吉 🌟"
+            daikichi_dirs.append(d)
+        # 4. 吉（比和：同じ五行で調和する）
+        elif star_elem == user_element:
+            dir_status[d] = "吉 ⭕"
+            kichi_dirs.append(d)
+        # 5. 吉凶混合（相克関係：気を損なうが凶殺ではない）
         else:
-            bad_dirs.append(d)
+            dir_status[d] = "吉凶 🔺"
+            kikyo_dirs.append(d)
             
-    return honmei_sei, good_dirs, bad_dirs
+    return honmei_sei, day_center, day_board, dir_status, daikichi_dirs, kichi_dirs, kikyo_dirs, kyo_dirs, daikyo_dirs
 
-def render_compass_board(good_dirs, bad_dirs, honmei_sei):
-    grid_layout = [
-        ("南東", "大吉 ⭕" if "南東" in good_dirs else ("凶 ❌" if "南東" in bad_dirs else "―")),
-        ("南", "大吉 ⭕" if "南" in good_dirs else ("凶 ❌" if "南" in bad_dirs else "―")),
-        ("南西", "大吉 ⭕" if "南西" in good_dirs else ("凶 ❌" if "南西" in bad_dirs else "―")),
-        ("東", "大吉 ⭕" if "東" in good_dirs else ("凶 ❌" if "東" in bad_dirs else "―")),
-        ("中央", honmei_sei[:2]),
-        ("西", "大吉 ⭕" if "西" in good_dirs else ("凶 ❌" if "西" in bad_dirs else "―")),
-        ("北東", "大吉 ⭕" if "北東" in good_dirs else ("凶 ❌" if "北東" in bad_dirs else "―")),
-        ("北", "大吉 ⭕" if "北" in good_dirs else ("凶 ❌" if "北" in bad_dirs else "―")),
-        ("北西", "大吉 ⭕" if "北西" in good_dirs else ("凶 ❌" if "北西" in bad_dirs else "―"))
-    ]
+def render_compass_board(board, dir_status, day_center):
+    grid_layout = ["南東", "南", "南西", "東", "中央", "西", "北東", "北", "北西"]
 
     grid_html = "<div class='compass-grid'>"
-    for dir_name, status in grid_layout:
-        cls = "center" if dir_name == "中央" else ("good" if "⭕" in status else ("bad" if "❌" in status else ""))
-        status_cls = "status-center" if dir_name == "中央" else ("status-good" if "⭕" in status else ("status-bad" if "❌" in status else ""))
+    for dir_name in grid_layout:
+        if dir_name == "中央":
+            cls = "center"
+            status_cls = "status-center"
+            display_star = day_center[:2]
+            title_text = "日中宮"
+            status_text = day_center[2:]
+        else:
+            star_full = board.get(dir_name, "")
+            display_star = star_full[:2] if star_full else dir_name
+            title_text = dir_name
+            status_text = dir_status.get(dir_name, "―")
+            
+            if "大吉" in status_text:
+                cls, status_cls = "daikichi", "status-daikichi"
+            elif "吉" in status_text and "吉凶" not in status_text and "大吉" not in status_text:
+                cls, status_cls = "kichi", "status-kichi"
+            elif "吉凶" in status_text:
+                cls, status_cls = "kikyo", "status-kikyo"
+            elif "大凶" in status_text:
+                cls, status_cls = "daikyo", "status-daikyo"
+            else:
+                cls, status_cls = "kyo", "status-kyo"
         
         grid_html += f"""
         <div class='compass-cell {cls}'>
-            <div class='compass-title'>{dir_name if dir_name != "中央" else "本命星"}</div>
-            <div class='compass-dir'>{dir_name if dir_name != "中央" else honmei_sei[:2]}</div>
-            <div class='compass-status {status_cls}'>{status}</div>
+            <div class='compass-title'>{title_text}</div>
+            <div class='compass-dir'>{display_star}</div>
+            <div class='compass-status {status_cls}'>{status_text}</div>
         </div>
         """
     grid_html += "</div>"
@@ -1342,7 +1432,7 @@ elif st.session_state.mode == "omikuji_only":
         st.image(st.session_state.omikuji_card_image, use_container_width=True)
 
 # ------------------------------------------
-# 🧭 モード3: 今日の吉方位診断（レパートリー50倍強化版）
+# 🧭 モード3: 今日の吉方位診断（流派・モード切り替え対応版）
 # ------------------------------------------
 elif st.session_state.mode == "direction_only":
     st.markdown('<div class="omikuji-heading">🧭 今日の吉方位鑑定 🧭</div>', unsafe_allow_html=True)
@@ -1355,7 +1445,27 @@ elif st.session_state.mode == "direction_only":
     
     b_input_dir = st.text_input("生年月日を8桁の数字で入力（例: 19900101）", value=st.session_state.birth_date_str, max_chars=8, key="b_dir_input")
     st.session_state.birth_date_str = b_input_dir
-    
+
+    st.markdown("---")
+    st.markdown("**【鑑定モード（用途選択）】**")
+    mode_option = st.radio(
+        "目的に応じたモードを選択してください",
+        [
+            "日常モード（日盤のみ）",
+            "厳密モード（年盤・月盤・日盤の三重重ね）"
+        ],
+        index=0,
+        help="日常のお出かけか、長距離移動・旅行かで判定モードを切り替えられます。"
+    )
+
+    if mode_option == "日常モード（日盤のみ）":
+        st.caption("💡 **日常モード**: 散歩、買い物、日帰りのお出かけ用。今日の日盤だけでサクッと吉方位を判定します。")
+        is_strict = False
+    else:
+        st.caption("💡 **厳密モード**: 旅行、出張、引っ越し用。日盤の吉方位であっても、年盤や月盤で五黄殺・暗剣殺などの大凶が重なる方位を自動で弾き出し、「完全に安全な大吉方位」だけを厳選して表示します。")
+        is_strict = True
+
+    st.write("")
     if st.button("🔮 吉方位を鑑定する 🔮", type="primary", use_container_width=True):
         active_key = get_api_key()
         if not active_key:
@@ -1365,16 +1475,18 @@ elif st.session_state.mode == "direction_only":
         else:
             try:
                 valid_date = datetime.date(int(b_input_dir[:4]), int(b_input_dir[4:6]), int(b_input_dir[6:8]))
-                honmei_sei, exact_good_dirs, exact_bad_dirs = calculate_exact_directions(valid_date, datetime.date.today())
+                honmei_sei, day_center, board, dir_status, daikichi_dirs, kichi_dirs, kikyo_dirs, kyo_dirs, daikyo_dirs = calculate_exact_directions(valid_date, datetime.date.today(), mode_strict=is_strict)
                 
-                good_str = ", ".join(exact_good_dirs) if exact_good_dirs else "特になし（平穏な1日）"
-                bad_str = ", ".join(exact_bad_dirs) if exact_bad_dirs else "特になし"
+                daikichi_str = ", ".join(daikichi_dirs) if daikichi_dirs else "なし"
+                kichi_str = ", ".join(kichi_dirs) if kichi_dirs else "なし"
+                kikyo_str = ", ".join(kikyo_dirs) if kikyo_dirs else "なし"
+                kyo_str = ", ".join(kyo_dirs) if kyo_dirs else "なし"
+                daikyo_str = ", ".join(daikyo_dirs) if daikyo_dirs else "なし"
 
                 status_holder_dir = st.empty()
                 with status_holder_dir.container():
                     render_video("cat_video6.mp4")
                     with st.spinner("九星気学の盤面を読み解き、本日の吉方位アドバイスを生成中..."):
-                        # 多彩なアドバイス切り口（毎回ランダムに視点を切り替えてバリエーションを無限化）
                         angles = [
                             "【五感と感性】吉方位の気の流れを感じるための香りの取り入れ方、音楽・サウンド、肌触り、景色、舌で感じる味覚に特化して解説してください。",
                             "【マインドフルネス＆メンタル整律】吉方位の持つ心理的心理・氣の整え方、思考の整理術、瞑想や深呼吸、自己肯定感を高める言葉に特化して解説してください。",
@@ -1390,22 +1502,26 @@ elif st.session_state.mode == "direction_only":
 鑑定ごとに全く異なる驚きと発見のある、超具体的かつ独創的な開運アドバイスを生成してください。
 
 ユーザー情報:
+- 鑑定モード: 『{'厳密モード（旅行・引越し用）' if is_strict else '日常モード（お出かけ用）'}』
 - 本命星: 『{honmei_sei}』
 - 本日の日付: 『{datetime.date.today()}』
-- 確定吉方位: 『{good_str}』
-- 確定凶方位: 『{bad_str}』
+- 大吉方位: 『{daikichi_str}』
+- 吉方位: 『{kichi_str}』
+- 吉凶混合: 『{kikyo_str}』
+- 凶方位: 『{kyo_str}』
+- 大凶方位: 『{daikyo_str}』
 
 【本日の特別鑑定切り口】
 本日のアドバイスは、特に以下の視点・テーマを深く掘り下げて生成してください：
 {chosen_angle}
 
 【絶対指示】
-本日の吉方位は「{good_str}」、凶方位は「{bad_str}」で確定しています。この決定された吉方位・凶方位のデータを「変更せず」そのまま用いて解説を作成してください。
+本日の各方位の判定データ（大吉/吉/吉凶混合/凶/大凶）を変更せず、そのまま活用して解説を作成してください。
 ※文章中で太字（**）などのマークダウン装飾記号は絶対に使わないでください。
 
 【出力フォーマット】
 【最高吉方位解説】
-[確定吉方位({good_str})のエネルギー解説と、本日吉方位のパワーを最大限に吸収するための具体的でユニークな行動（2〜3文）]
+[大吉方位({daikichi_str})や吉方位({kichi_str})のエネルギー解説と、パワーを最大限に吸収するための具体的でユニークな行動（2〜3文）]
 
 【項目別アドバイス】
 💖 恋愛・対人運: [人間関係の距離感やコミュニケーションの切り口、開運アドバイス]
@@ -1426,36 +1542,56 @@ elif st.session_state.mode == "direction_only":
                             )
                         )
                         st.session_state.direction_result_text = response_dir.text
-                        st.session_state.exact_good_dirs = exact_good_dirs
-                        st.session_state.exact_bad_dirs = exact_bad_dirs
+                        st.session_state.board = board
+                        st.session_state.dir_status = dir_status
+                        st.session_state.daikichi_dirs = daikichi_dirs
+                        st.session_state.kichi_dirs = kichi_dirs
+                        st.session_state.kikyo_dirs = kikyo_dirs
+                        st.session_state.kyo_dirs = kyo_dirs
+                        st.session_state.daikyo_dirs = daikyo_dirs
                         st.session_state.honmei_sei = honmei_sei
+                        st.session_state.day_center = day_center
+                        st.session_state.is_strict_used = is_strict
                 status_holder_dir.empty()
             except Exception as e:
                 st.error(f"吉方位鑑定中にエラーが発生しました: {e}")
 
     if st.session_state.direction_result_text:
         honmei_sei = st.session_state.get("honmei_sei", "一白水星")
-        good_dirs = st.session_state.get("exact_good_dirs", [])
-        bad_dirs = st.session_state.get("exact_bad_dirs", [])
+        day_center = st.session_state.get("day_center", "六白金星")
+        board = st.session_state.get("board", {})
+        dir_status = st.session_state.get("dir_status", {})
+        daikichi_dirs = st.session_state.get("daikichi_dirs", [])
+        kichi_dirs = st.session_state.get("kichi_dirs", [])
+        daikyo_dirs = st.session_state.get("daikyo_dirs", [])
+        used_strict = st.session_state.get("is_strict_used", False)
         
-        compass_board_html = render_compass_board(good_dirs, bad_dirs, honmei_sei)
+        compass_board_html = render_compass_board(board, dir_status, day_center)
         
-        good_text = ", ".join(good_dirs) if good_dirs else "特になし（平穏）"
-        bad_text = ", ".join(bad_dirs) if bad_dirs else "特になし（平和）"
+        daikichi_text = ", ".join(daikichi_dirs) if daikichi_dirs else "なし"
+        kichi_text = ", ".join(kichi_dirs) if kichi_dirs else "なし"
+        daikyo_text = ", ".join(daikyo_dirs) if daikyo_dirs else "なし"
+
+        mode_badge = "厳密モード（三重重ね）" if used_strict else "日常モード（日盤）"
 
         st.markdown(f"""
         <div class="notranslate" style="background: rgba(12, 16, 28, 0.55); backdrop-filter: blur(8px); border: 1.5px solid rgba(212, 175, 55, 0.8); border-radius: 14px; padding: 1.5rem; margin-top: 1.2rem;">
             <h3 style="color:#FFE066; text-align:center; margin-top:0; font-size: 1.3rem; text-shadow: 0 2px 4px #000;">🧭 本日の九星気学 方位盤 🧭</h3>
-            <div style="text-align:center; color:#D0D8EC; font-size:0.95rem; margin-bottom:8px; font-weight:bold;">本命星: {honmei_sei}</div>
+            <div style="text-align:center; color:#D0D8EC; font-size:0.95rem; margin-bottom:4px; font-weight:bold;">本命星: {honmei_sei}（日中宮: {day_center}）</div>
+            <div style="text-align:center; color:#FFE066; font-size:0.8rem; margin-bottom:10px;">【判定モード: {mode_badge}】</div>
             {compass_board_html}
             <div style="margin-top: 1.2rem;">
-                <div style="background:rgba(20, 35, 25, 0.45); border-left:4px solid #55FF55; padding:10px 12px; border-radius:6px; margin-bottom:10px; border:1px solid rgba(85,255,85,0.3);">
-                    <b style="color:#FFE066; font-size:1.0rem; text-shadow:0 1px 2px #000;">✨ 本日の最高吉方位：</b>
-                    <span style="color:#55FF55; font-size:1.2rem; font-weight:bold; margin-left:6px; text-shadow:0 0 8px rgba(85,255,85,0.6);">{good_text}</span>
+                <div style="background:rgba(20, 35, 25, 0.45); border-left:4px solid #55FF55; padding:8px 12px; border-radius:6px; margin-bottom:8px; border:1px solid rgba(85,255,85,0.3);">
+                    <b style="color:#FFE066; font-size:0.95rem; text-shadow:0 1px 2px #000;">🌟 本日の最高吉方位：</b>
+                    <span style="color:#55FF55; font-size:1.1rem; font-weight:bold; margin-left:6px; text-shadow:0 0 8px rgba(85,255,85,0.6);">{daikichi_text}</span>
                 </div>
-                <div style="background:rgba(35, 20, 25, 0.45); border-left:4px solid #FF6666; padding:10px 12px; border-radius:6px; margin-bottom:16px; border:1px solid rgba(255,102,102,0.3);">
-                    <b style="color:#FFE066; font-size:1.0rem; text-shadow:0 1px 2px #000;">⚠️ 本日の警戒凶方位：</b>
-                    <span style="color:#FF6666; font-size:1.1rem; font-weight:bold; margin-left:6px; text-shadow:0 0 8px rgba(255,102,102,0.6);">{bad_text}</span>
+                <div style="background:rgba(20, 30, 45, 0.45); border-left:4px solid #33AAFF; padding:8px 12px; border-radius:6px; margin-bottom:8px; border:1px solid rgba(51,170,255,0.3);">
+                    <b style="color:#FFE066; font-size:0.95rem; text-shadow:0 1px 2px #000;">⭕ 本日の吉方位：</b>
+                    <span style="color:#33AAFF; font-size:1.05rem; font-weight:bold; margin-left:6px; text-shadow:0 0 8px rgba(51,170,255,0.6);">{kichi_text}</span>
+                </div>
+                <div style="background:rgba(35, 20, 25, 0.45); border-left:4px solid #FF4444; padding:8px 12px; border-radius:6px; margin-bottom:12px; border:1px solid rgba(255,68,68,0.3);">
+                    <b style="color:#FFE066; font-size:0.95rem; text-shadow:0 1px 2px #000;">❌ 警戒大凶方位：</b>
+                    <span style="color:#FF4444; font-size:1.05rem; font-weight:bold; margin-left:6px; text-shadow:0 0 8px rgba(255,68,68,0.6);">{daikyo_text}</span>
                 </div>
             </div>
         </div>
