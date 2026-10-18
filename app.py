@@ -413,6 +413,13 @@ def render_video(video_filename="cat_video2.mp4"):
 TIAN_GAN = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"]
 DI_ZHI = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"]
 
+# 地支の対冲方位マッピング（日破用：十二支 ➔ 該当方位）
+ZHI_TO_DIR = {
+    "子": "北", "丑": "北東", "寅": "北東", "卯": "東",
+    "辰": "南東", "巳": "南東", "午": "南", "未": "南西",
+    "申": "南西", "酉": "西", "戌": "北西", "亥": "北西"
+}
+
 GAN_WU_XING = {"甲": "木", "乙": "木", "丙": "火", "丁": "火", "戊": "土", "己": "土", "庚": "金", "辛": "金", "壬": "水", "癸": "水"}
 ZHI_WU_XING = {"子": "水", "丑": "土", "寅": "木", "卯": "木", "辰": "土", "巳": "火", "午": "火", "未": "土", "申": "金", "酉": "金", "戌": "土", "亥": "水"}
 WU_XING_CLASS = {"木": "wx-wood", "火": "wx-fire", "土": "wx-earth", "金": "wx-metal", "水": "wx-water"}
@@ -449,7 +456,7 @@ TSUHEN_MAP = {
     "丙": {"甲": "偏印", "乙": "印綬", "丙": "比肩", "丁": "劫財", "戊": "食神", "己": "傷官", "庚": "偏財", "辛": "正財", "壬": "偏官", "癸": "正官"},
     "丁": {"甲": "印綬", "乙": "偏印", "丙": "劫財", "丁": "比肩", "戊": "傷官", "己": "食神", "庚": "正財", "辛": "偏財", "壬": "偏官", "癸": "偏官"},
     "戊": {"甲": "偏官", "乙": "正官", "丙": "偏印", "丁": "印綬", "戊": "比肩", "己": "劫財", "庚": "食神", "辛": "傷官", "壬": "偏財", "癸": "正財"},
-    "己": {"甲": "正官", "乙": "偏官", "丙": "印綬", "丁": "偏印", "戊": "劫財", "己": "比肩", "庚": "傷官", "辛": "食神", "壬": "正財", "癸": "偏財"},
+    "己": {"甲": "正官", "乙": "偏官", "丙": "印綬", "丁": "偏印", "戊": "劫財", "己": "比肩", "庚": "傷官", "辛": "食神", "壬": "偏財", "癸": "偏財"},
     "庚": {"甲": "偏財", "乙": "正財", "丙": "偏官", "丁": "正官", "戊": "偏印", "己": "印綬", "庚": "比肩", "辛": "劫財", "壬": "食神", "癸": "傷官"},
     "辛": {"甲": "正財", "乙": "偏財", "丙": "正官", "丁": "偏官", "戊": "印綬", "己": "偏印", "庚": "劫財", "辛": "比肩", "壬": "傷官", "癸": "食神"},
     "壬": {"甲": "食神", "乙": "傷官", "丙": "偏財", "丁": "正財", "戊": "偏官", "己": "正官", "庚": "偏印", "辛": "印綬", "壬": "比肩", "癸": "劫財"},
@@ -482,6 +489,10 @@ def format_wuxing_color(text: str) -> str:
 def get_day_gan(dt: datetime.date) -> str:
     base_date = datetime.date(1900, 1, 1)
     return TIAN_GAN[(dt - base_date).days % 10]
+
+def get_day_zhi(dt: datetime.date) -> str:
+    base_date = datetime.date(1900, 1, 1)
+    return DI_ZHI[(10 + (dt - base_date).days) % 12]
 
 def calculate_guxing_info(birth_date: datetime.date, target_date: datetime.date):
     user_gan = get_day_gan(birth_date)
@@ -824,6 +835,27 @@ def get_honmei_sei(birth_date: datetime.date) -> str:
         star_num -= 9
     return NINE_STARS[star_num - 1]
 
+def get_getsumei_sei(birth_date: datetime.date) -> str:
+    """生年月日から月命星（生まれ月の九星）を算出"""
+    honmei = get_honmei_sei(birth_date)
+    honmei_num = NINE_STARS.index(honmei) + 1
+    
+    m = birth_date.month
+    if birth_date.day < 4:  # 概算節入り日
+        m -= 1
+        if m < 1: m = 12
+        
+    # 本命星グループ（一四七, 二五八, 三六九）に応じた月命星算出テーブル
+    if honmei_num in [1, 4, 7]:
+        base_stars = [8, 7, 6, 5, 4, 3, 2, 1, 0, 8, 7, 6]
+    elif honmei_num in [2, 5, 8]:
+        base_stars = [2, 1, 0, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+    else:
+        base_stars = [5, 4, 3, 2, 1, 0, 8, 7, 6, 5, 4, 3]
+        
+    star_idx = base_stars[(m - 1) % 12]
+    return NINE_STARS[star_idx]
+
 def get_year_star(dt: datetime.date) -> str:
     year = dt.year
     if dt < datetime.date(year, 2, 4):
@@ -849,7 +881,7 @@ YONTON_INTON_TABLE = [
     (datetime.date(2025, 6, 23),  'inton',  8), # 2025/06/23 甲子 -> 陰遁九紫火星
     (datetime.date(2025, 12, 20), 'yonton', 0), # 2025/12/20 甲子 -> 陽遁一白水星
     (datetime.date(2026, 6, 18),  'inton',  8), # 2026/06/18 甲子 -> 陰遁九紫火星
-    (datetime.date(2026, 10, 17), 'yonton', 5), # 2026/10/17 甲子 -> 陽遁六白金星 ★標準暦一致用
+    (datetime.date(2026, 10, 17), 'inton',  5), # 2026/10/17 甲子 -> 陰遁六白金星（10/18は五黄土星）
     (datetime.date(2026, 12, 15), 'yonton', 0), # 2026/12/15 甲子 -> 陽遁一白水星
     (datetime.date(2027, 6, 13),  'inton',  8), # 2027/06/13 甲子 -> 陰遁九紫火星
 ]
@@ -879,8 +911,13 @@ def get_day_star(dt: datetime.date) -> str:
     return NINE_STARS[star_idx]
 
 def get_board_for_star(center_star: str) -> dict:
+    """九星気学の標準飛泊順序（後天八卦陣の定位）に従った正しく標準的な盤面配置"""
     center_idx = NINE_STARS.index(center_star)
-    offsets = {"北": 4, "北東": 7, "東": 2, "南東": 3, "南": 8, "南西": 1, "西": 5, "北西": 6}
+    # 後天八卦陣の飛泊Offset: 北西=1, 西=2, 北東=3, 南=4, 北=5, 南西=6, 東=7, 南東=8
+    offsets = {
+        "北西": 1, "西": 2, "北東": 3, "南": 4,
+        "北": 5, "南西": 6, "東": 7, "南東": 8
+    }
     board = {}
     for d, off in offsets.items():
         star_idx = (center_idx + off) % 9
@@ -889,6 +926,7 @@ def get_board_for_star(center_star: str) -> dict:
 
 def calculate_exact_directions(birth_date: datetime.date, target_date: datetime.date, mode_strict: bool = False):
     honmei_sei = get_honmei_sei(birth_date)
+    getsumei_sei = get_getsumei_sei(birth_date)
     user_element = STAR_ELEMENTS[honmei_sei]
     
     # 日盤
@@ -901,16 +939,29 @@ def calculate_exact_directions(birth_date: datetime.date, target_date: datetime.
     month_center = get_month_star(target_date)
     month_board = get_board_for_star(month_center)
 
-    # 日盤の凶方位抽出
+    # 五黄殺・暗剣殺（日盤）
     goou_dir_day = next((d for d, s in day_board.items() if s == "五黄土星"), None)
     anken_dir_day = OPPOSITE_DIR.get(goou_dir_day) if goou_dir_day else None
+
+    # 本命殺・本命的殺（日盤）
     honmei_dir_day = next((d for d, s in day_board.items() if s == honmei_sei), None)
     teki_dir_day = OPPOSITE_DIR.get(honmei_dir_day) if honmei_dir_day else None
+
+    # 月命殺・月命的殺（日盤）
+    getsumei_dir_day = next((d for d, s in day_board.items() if s == getsumei_sei), None)
+    getsumei_teki_dir_day = OPPOSITE_DIR.get(getsumei_dir_day) if getsumei_dir_day else None
+
+    # 日破（日支の対冲方位）
+    today_zhi = get_day_zhi(target_date)
+    # 日支の反対側（対冲地支）の算出
+    opposite_zhi = DI_ZHI[(DI_ZHI.index(today_zhi) + 6) % 12]
+    nippa_dir = ZHI_TO_DIR.get(opposite_zhi)
 
     # 年盤・月盤の凶方位抽出（厳密モード用）
     daikyo_dirs_all = set()
     if goou_dir_day: daikyo_dirs_all.add(goou_dir_day)
     if anken_dir_day: daikyo_dirs_all.add(anken_dir_day)
+    if nippa_dir: daikyo_dirs_all.add(nippa_dir)
 
     if mode_strict:
         y_goou = next((d for d, s in year_board.items() if s == "五黄土星"), None)
@@ -928,12 +979,12 @@ def calculate_exact_directions(birth_date: datetime.date, target_date: datetime.
     for d, star in day_board.items():
         star_elem = STAR_ELEMENTS[star]
         
-        # 1. 大凶方位（五黄殺・暗剣殺）
+        # 1. 大凶方位（五黄殺・暗剣殺・日破）
         if d in daikyo_dirs_all:
             dir_status[d] = "大凶 ❌"
             daikyo_dirs.append(d)
-        # 2. 凶方位（本命殺・本命的殺）
-        elif d in [honmei_dir_day, teki_dir_day]:
+        # 2. 凶方位（本命殺・本命的殺・月命殺・月命的殺）
+        elif d in [honmei_dir_day, teki_dir_day, getsumei_dir_day, getsumei_teki_dir_day]:
             dir_status[d] = "凶 ⚠️"
             kyo_dirs.append(d)
         # 3. 大吉（生気・退気：相生関係で運気を強く高める）
@@ -1558,7 +1609,7 @@ elif st.session_state.mode == "direction_only":
 
     if st.session_state.direction_result_text:
         honmei_sei = st.session_state.get("honmei_sei", "一白水星")
-        day_center = st.session_state.get("day_center", "六白金星")
+        day_center = st.session_state.get("day_center", "五黄土星")
         board = st.session_state.get("board", {})
         dir_status = st.session_state.get("dir_status", {})
         daikichi_dirs = st.session_state.get("daikichi_dirs", [])
