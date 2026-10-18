@@ -1627,7 +1627,7 @@ elif st.session_state.mode == "direction_only":
 
         st.markdown(f"""
         <div class="notranslate" style="background: rgba(12, 16, 28, 0.55); backdrop-filter: blur(8px); border: 1.5px solid rgba(212, 175, 55, 0.8); border-radius: 14px; padding: 1.5rem; margin-top: 1.2rem;">
-            <h3 style="color:#FFE066; text-align:center; margin-top:0; font-size: 1.3rem; text-shadow: 0 2px 4px #000;">🧭 本日の九星気学 方位盤 🧭</h3>
+            <h3 style="color:#FFE066; text-align:center; margin-top:0; font-size: 1.3rem; text-shadow: 0 2px 4px #000;">🧭 本日の方位盤 🧭</h3>
             <div style="text-align:center; color:#D0D8EC; font-size:0.95rem; margin-bottom:4px; font-weight:bold;">本命星: {honmei_sei}（日中宮: {day_center}）</div>
             <div style="text-align:center; color:#FFE066; font-size:0.8rem; margin-bottom:10px;">【判定モード: {mode_badge}】</div>
             {compass_board_html}
