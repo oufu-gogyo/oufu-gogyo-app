@@ -13,6 +13,10 @@ from google.genai import types
 from dotenv import load_dotenv
 import plotly.graph_objects as go
 
+# 日本時間（JST）の本日日付を取得する関数（UTCサーバー環境対策）
+def get_jst_today():
+    return (datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=9)).date()
+
 # ==========================================
 # 0. 環境変数（.env）の読み込み
 # ==========================================
@@ -1238,7 +1242,8 @@ elif st.session_state.mode == "diagnosis":
             else:
                 try:
                     image = Image.open(st.session_state.uploaded_file)
-                    wuxing_info = calculate_guxing_info(valid_date, datetime.date.today())
+                    today_jst = get_jst_today()
+                    wuxing_info = calculate_guxing_info(valid_date, today_jst)
                     st.session_state.omikuji_text = None
                     st.session_state.omikuji_result_type = None
                     st.session_state.omikuji_card_image = None
@@ -1559,7 +1564,8 @@ elif st.session_state.mode == "direction_only":
         else:
             try:
                 valid_date = datetime.date(int(b_input_dir[:4]), int(b_input_dir[4:6]), int(b_input_dir[6:8]))
-                honmei_sei, day_center, board, dir_status, daikichi_dirs, kichi_dirs, kikyo_dirs, kyo_dirs, daikyo_dirs = calculate_exact_directions(valid_date, datetime.date.today(), mode_strict=is_strict)
+                today_jst = get_jst_today()
+                honmei_sei, day_center, board, dir_status, daikichi_dirs, kichi_dirs, kikyo_dirs, kyo_dirs, daikyo_dirs = calculate_exact_directions(valid_date, today_jst, mode_strict=is_strict)
                 
                 daikichi_str = ", ".join(daikichi_dirs) if daikichi_dirs else "なし"
                 kichi_str = ", ".join(kichi_dirs) if kichi_dirs else "なし"
@@ -1588,7 +1594,7 @@ elif st.session_state.mode == "direction_only":
 ユーザー情報:
 - 鑑定モード: 『{'厳密モード（旅行・引越し用）' if is_strict else '日常モード（お出かけ用）'}』
 - 本命星: 『{honmei_sei}』
-- 本日の日付: 『{datetime.date.today()}』
+- 本日の日付: 『{today_jst}』
 - 大吉方位: 『{daikichi_str}』
 - 吉方位: 『{kichi_str}』
 - 吉凶混合: 『{kikyo_str}』
@@ -1740,9 +1746,10 @@ elif st.session_state.mode == "four_pillars":
         else:
             try:
                 valid_date = datetime.date(int(b_input_fp[:4]), int(b_input_fp[4:6]), int(b_input_fp[6:8]))
+                today_jst = get_jst_today()
                 
                 fp_data = calculate_four_pillars(valid_date, hour_val)
-                today_fp = calculate_four_pillars(datetime.date.today())
+                today_fp = calculate_four_pillars(today_jst)
 
                 status_holder_fp = st.empty()
                 with status_holder_fp.container():
