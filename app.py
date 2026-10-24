@@ -377,6 +377,37 @@ if img_base64:
             text-align: center !important;
             margin-bottom: 1rem !important;
         }
+
+        /* A8.net 広告用スタイリング */
+        .a8-ad-box {
+            text-align: center;
+            margin: 1.5rem 0;
+            padding: 1.2rem;
+            background: rgba(20, 26, 45, 0.75);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 215, 0, 0.5);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: center;
+        }
+        .a8-ad-box img {
+            max-width: 100%;
+            height: auto;
+        }
+        .a8-ad-box p {
+            color: #FFE066 !important;
+            font-size: 0.95rem;
+            font-weight: bold;
+            margin-bottom: 0.8rem !important;
+        }
+        .a8-ad-box a {
+            color: #66CCFF !important;
+            font-weight: bold;
+            text-decoration: underline;
+            font-size: 1rem;
+        }
         </style>
     """
     css_code = css_template.replace('__IMAGE_DATA__', img_base64)
@@ -407,13 +438,30 @@ def render_video(video_filename="cat_video2.mp4"):
         """
         st.markdown(v_html, unsafe_allow_html=True)
 
+# A8.net 広告描画関数
+def render_a8_ad():
+    ad_html = """
+    <div class="a8-ad-box">
+        <div>
+            <a href="https://px.a8.net/svt/ejp?a8mat=4BCKBS+BAN2YA+4PWE+BXIYP" rel="nofollow">
+            <img border="0" width="468" height="60" alt="" src="https://www21.a8.net/svt/bgt?aid=260926696683&wid=001&eno=01&mid=s00000022019002004000&mc=1"></a>
+            <img border="0" width="1" height="1" src="https://www19.a8.net/0.gif?a8mat=4BCKBS+BAN2YA+4PWE+BXIYP" alt="">
+        </div>
+        <div>
+            <a href="https://px.a8.net/svt/ejp?a8mat=4BCKBS+BPIX2Q+2PEO+C58QP" rel="nofollow">
+            <img border="0" width="640" height="100" alt="" src="https://www29.a8.net/svt/bgt?aid=260926696708&wid=001&eno=01&mid=s00000012624002040000&mc=1"></a>
+            <img border="0" width="1" height="1" src="https://www19.a8.net/0.gif?a8mat=4BCKBS+BPIX2Q+2PEO+C58QP" alt="">
+        </div>
+    </div>
+    """
+    st.markdown(ad_html, unsafe_allow_html=True)
+
 # ==========================================
 # 3. 万年暦・五行・九星・四柱推命計算エンジン & 画像処理
 # ==========================================
 TIAN_GAN = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"]
 DI_ZHI = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"]
 
-# 地支の対冲方位マッピング（日破用：十二支 ➔ 該当8方位の正確な対応）
 ZHI_TO_DIR = {
     "子": "北", "丑": "北東", "寅": "北東", "卯": "東",
     "辰": "南東", "巳": "南東", "午": "南", "未": "南西",
@@ -424,7 +472,6 @@ GAN_WU_XING = {"甲": "木", "乙": "木", "丙": "火", "丁": "火", "戊": "�
 ZHI_WU_XING = {"子": "水", "丑": "土", "寅": "木", "卯": "木", "辰": "土", "巳": "火", "午": "火", "未": "土", "申": "金", "酉": "金", "戌": "土", "亥": "水"}
 WU_XING_CLASS = {"木": "wx-wood", "火": "wx-fire", "土": "wx-earth", "金": "wx-metal", "水": "wx-water"}
 
-# 蔵干（本気）定義テーブル
 ZHI_ZOUGAN_HONKI = {
     "子": "癸", "丑": "己", "寅": "甲", "卯": "乙",
     "辰": "戊", "巳": "丙", "午": "丁", "未": "己",
@@ -460,7 +507,7 @@ TSUHEN_MAP = {
     "庚": {"甲": "偏財", "乙": "正財", "丙": "偏官", "丁": "正官", "戊": "偏印", "己": "印綬", "庚": "比肩", "辛": "劫財", "壬": "食神", "癸": "傷官"},
     "辛": {"甲": "偏財", "乙": "正財", "丙": "偏官", "丁": "正官", "戊": "偏印", "己": "印綬", "庚": "劫財", "辛": "比肩", "壬": "傷官", "癸": "食神"},
     "壬": {"甲": "食神", "乙": "傷官", "丙": "偏財", "丁": "正財", "戊": "偏官", "己": "正官", "庚": "偏印", "辛": "印綬", "壬": "比肩", "癸": "劫財"},
-    "癸": {"甲": "傷官", "乙": "食神", "丙": "正財", "丁": "偏財", "戊": "正官", "己": "偏官", "庚": "印綬", "辛": "偏印", "壬": "劫財", "癸": "比肩"}
+    "癸": {"甲": "傷官", "乙": "食神", "丙": "偏財", "丁": "偏財", "戊": "正官", "己": "偏官", "庚": "印綬", "辛": "偏印", "壬": "劫財", "癸": "比肩"}
 }
 
 COLOR_CSS_MAP = {
@@ -675,7 +722,6 @@ def generate_omikuji_card_image(fortune_type, omikuji_raw_text):
     draw.text((card_w // 2, 1655), "--- 陰陽SNSアイコン診断 & 開運おみくじ ---", font=footer_font, fill=(160, 170, 190), anchor="mm")
     return card
 
-# ── 精密・節入り日時データベース（万年暦テーブル方式） ──
 SETSUIRI_DATABASE = {
     1990: {
         1: datetime.datetime(1990, 1, 6, 0, 12),   # 小寒
@@ -694,7 +740,6 @@ SETSUIRI_DATABASE = {
 }
 
 def get_exact_setsuiri_datetime(year: int, month: int) -> datetime.datetime:
-    """万年暦データベースから節入り日時を取得（未定義の年は平均的な標準値を返すフォールバック）"""
     if year in SETSUIRI_DATABASE and month in SETSUIRI_DATABASE[year]:
         return SETSUIRI_DATABASE[year][month]
     
@@ -702,21 +747,18 @@ def get_exact_setsuiri_datetime(year: int, month: int) -> datetime.datetime:
     day, hour = default_days.get(month, (8, 0))
     return datetime.datetime(year, month, day, hour, 0)
 
-# ── 四柱推命計算関数 ──
 HOUR_ZHI_MAP = [
     (23, 1, "子"), (1, 3, "丑"), (3, 5, "寅"), (5, 7, "卯"),
     (7, 9, "辰"), (9, 11, "巳"), (11, 13, "午"), (13, 15, "未"),
     (15, 17, "申"), (17, 19, "酉"), (19, 21, "戌"), (21, 23, "亥")
 ]
 
-# 五虎遁月法ルックアップテーブル（正確な節月構造版）
-# 節月 1=寅(2月), 2=卯(3月), 3=辰(4月), 4=巳(5月), 5=午(6月), 6=未(7月), 7=申(8月), 8=酉(9月), 9=戌(10月), 10=亥(11月), 11=子(12月), 12=丑(1月)
 GOKO_TONGETSU_MAP = {
-    0: {1: "丙", 2: "丁", 3: "戊", 4: "己", 5: "庚", 6: "辛", 7: "壬", 8: "癸", 9: "甲", 10: "乙", 11: "丙", 12: "丁"}, # 甲・己年
-    1: {1: "戊", 2: "己", 3: "庚", 4: "辛", 5: "壬", 6: "癸", 7: "甲", 8: "乙", 9: "丙", 10: "丁", 11: "戊", 12: "己"}, # 乙・庚年
-    2: {1: "庚", 2: "辛", 3: "壬", 4: "癸", 5: "甲", 6: "乙", 7: "丙", 8: "丁", 9: "戊", 10: "己", 11: "庚", 12: "辛"}, # 丙・辛年
-    3: {1: "壬", 2: "癸", 3: "甲", 4: "乙", 5: "丙", 6: "丁", 7: "戊", 8: "己", 9: "庚", 10: "辛", 11: "壬", 12: "癸"}, # 丁・壬年
-    4: {1: "甲", 2: "乙", 3: "丙", 4: "丁", 5: "戊", 6: "己", 7: "庚", 8: "辛", 9: "壬", 10: "癸", 11: "甲", 12: "乙"}  # 戊・癸年
+    0: {1: "丙", 2: "丁", 3: "戊", 4: "己", 5: "庚", 6: "辛", 7: "壬", 8: "癸", 9: "甲", 10: "乙", 11: "丙", 12: "丁"},
+    1: {1: "戊", 2: "己", 3: "庚", 4: "辛", 5: "壬", 6: "癸", 7: "甲", 8: "乙", 9: "丙", 10: "丁", 11: "戊", 12: "己"},
+    2: {1: "庚", 2: "辛", 3: "壬", 4: "癸", 5: "甲", 6: "乙", 7: "丙", 8: "丁", 9: "戊", 10: "己", 11: "庚", 12: "辛"},
+    3: {1: "壬", 2: "癸", 3: "甲", 4: "乙", 5: "丙", 6: "丁", 7: "戊", 8: "己", 9: "庚", 10: "辛", 11: "壬", 12: "癸"},
+    4: {1: "甲", 2: "乙", 3: "丙", 4: "丁", 5: "戊", 6: "己", 7: "庚", 8: "辛", 9: "壬", 10: "癸", 11: "甲", 12: "乙"}
 }
 
 def get_hour_zhi(hour_val):
@@ -732,7 +774,6 @@ def calculate_four_pillars(dt: datetime.date, hour_val=None):
     birth_hour = hour_val if hour_val is not None else 12
     birth_dt = datetime.datetime(dt.year, dt.month, dt.day, birth_hour, 0)
     
-    # 1. 日柱（日干・日支）
     base_date = datetime.date(1900, 1, 1)
     diff = (dt - base_date).days
     day_gan_idx = (0 + diff) % 10
@@ -740,7 +781,6 @@ def calculate_four_pillars(dt: datetime.date, hour_val=None):
     day_gan = TIAN_GAN[day_gan_idx]
     day_zhi = DI_ZHI[day_zhi_idx]
     
-    # 2. 年柱（年干・年支）：立春の正確な日時と比較
     risshun_dt = get_exact_setsuiri_datetime(dt.year, 2)
     calc_year = dt.year
     if birth_dt < risshun_dt:
@@ -751,7 +791,6 @@ def calculate_four_pillars(dt: datetime.date, hour_val=None):
     year_gan = TIAN_GAN[year_gan_idx]
     year_zhi = DI_ZHI[year_zhi_idx]
     
-    # 3. 月柱（月干・月支）：当月の正確な節入り日時と比較
     current_setsu_dt = get_exact_setsuiri_datetime(dt.year, dt.month)
     
     if birth_dt >= current_setsu_dt:
@@ -761,14 +800,12 @@ def calculate_four_pillars(dt: datetime.date, hour_val=None):
         if setsu_month_num < 1:
             setsu_month_num = 12
 
-    # カレンダー月(1〜12月)から節月インデックス(1=寅月〜12=丑月)へのマッピング
     CALENDAR_TO_SETSU_IDX = {
         2: 1, 3: 2, 4: 3, 5: 4, 6: 5, 7: 6,
         8: 7, 9: 8, 10: 9, 11: 10, 12: 11, 1: 12
     }
     setsu_idx = CALENDAR_TO_SETSU_IDX[setsu_month_num]
 
-    # 節月インデックス(1=寅~12=丑)から月支インデックス(2=寅~1=丑)へのマッピング
     SETSU_TO_ZHI_IDX = {
         1: 2, 2: 3, 3: 4, 4: 5, 5: 6, 6: 7,
         7: 8, 8: 9, 9: 10, 10: 11, 11: 0, 12: 1
@@ -776,11 +813,9 @@ def calculate_four_pillars(dt: datetime.date, hour_val=None):
     month_zhi_idx = SETSU_TO_ZHI_IDX[setsu_idx]
     month_zhi = DI_ZHI[month_zhi_idx]
 
-    # 五虎遁月法（月干計算）
     gan_group = year_gan_idx % 5
     month_gan = GOKO_TONGETSU_MAP[gan_group][setsu_idx]
     
-    # 4. 時柱
     hour_gan, hour_zhi, tsuhen_hour = "不明", "不明", "不明"
     if hour_val is not None:
         hour_zhi = get_hour_zhi(hour_val)
@@ -790,11 +825,9 @@ def calculate_four_pillars(dt: datetime.date, hour_val=None):
         hour_gan = TIAN_GAN[hour_gan_idx]
         tsuhen_hour = TSUHEN_MAP[day_gan][hour_gan]
     
-    # 通変星・格の計算
     tsuhen_year = TSUHEN_MAP[day_gan][year_gan]
     tsuhen_month = TSUHEN_MAP[day_gan][month_gan]
     
-    # 月支蔵干（本気）から主格を判定
     month_zougan_honki = ZHI_ZOUGAN_HONKI[month_zhi]
     main_kaku = TSUHEN_MAP[day_gan][month_zougan_honki]
 
@@ -824,7 +857,6 @@ def calculate_four_pillars(dt: datetime.date, hour_val=None):
         "wuxing_counts": wuxing_counts
     }
 
-# ── 九星気学計算関数 ──
 def get_honmei_sei(birth_date: datetime.date) -> str:
     year = birth_date.year
     if birth_date < datetime.date(year, 2, 4):
@@ -836,16 +868,14 @@ def get_honmei_sei(birth_date: datetime.date) -> str:
     return NINE_STARS[star_num - 1]
 
 def get_getsumei_sei(birth_date: datetime.date) -> str:
-    """生年月日から月命星（生まれ月の九星）を算出"""
     honmei = get_honmei_sei(birth_date)
     honmei_num = NINE_STARS.index(honmei) + 1
     
     m = birth_date.month
-    if birth_date.day < 4:  # 概算節入り日
+    if birth_date.day < 4:
         m -= 1
         if m < 1: m = 12
         
-    # 本命星グループ（一四七, 二五八, 三六九）に応じた月命星算出テーブル
     if honmei_num in [1, 4, 7]:
         base_stars = [8, 7, 6, 5, 4, 3, 2, 1, 0, 8, 7, 6]
     elif honmei_num in [2, 5, 8]:
@@ -873,23 +903,20 @@ def get_month_star(dt: datetime.date) -> str:
     m_idx = (dt.month - 2) % 12
     return NINE_STARS[(base_month_stars[m_idx] - (y_idx % 3) * 3) % 9]
 
-# ── 日盤データベース（完全固定マッピング＆正確な切替日基準テーブル） ──
-# 暦サイトと100%一致させるための切替基準テーブル（夏至・冬至付近の甲子日基準）
 EXACT_SWITCH_ANCHORS = [
-    (datetime.date(2023, 7, 3),   'inton',  8), # 2023/07/03 甲子 -> 陰遁九紫火星
-    (datetime.date(2023, 12, 31), 'yonton', 0), # 2023/12/31 甲子 -> 陽遁一白水星
-    (datetime.date(2024, 6, 28),  'inton',  8), # 2024/06/28 甲子 -> 陰遁九紫火星
-    (datetime.date(2024, 12, 25), 'yonton', 0), # 2024/12/25 甲子 -> 陽遁一白水星
-    (datetime.date(2025, 6, 23),  'inton',  8), # 2025/06/23 甲子 -> 陰遁九紫火星
-    (datetime.date(2025, 12, 20), 'yonton', 0), # 2025/12/20 甲子 -> 陽遁一白水星
-    (datetime.date(2026, 6, 18),  'inton',  8), # 2026/06/18 甲子 -> 陰遁九紫火星
-    (datetime.date(2026, 10, 17), 'inton',  5), # 2026/10/17 甲子 -> 陰遁六白金星（10/24=八白土星, 10/25=七赤金星）
-    (datetime.date(2026, 12, 15), 'yonton', 0), # 2026/12/15 甲子 -> 陽遁一白水星
-    (datetime.date(2027, 6, 13),  'inton',  8), # 2027/06/13 甲子 -> 陰遁九紫火星
-    (datetime.date(2027, 12, 10), 'yonton', 0), # 2027/12/10 甲子 -> 陽遁一白水星
+    (datetime.date(2023, 7, 3),   'inton',  8),
+    (datetime.date(2023, 12, 31), 'yonton', 0),
+    (datetime.date(2024, 6, 28),  'inton',  8),
+    (datetime.date(2024, 12, 25), 'yonton', 0),
+    (datetime.date(2025, 6, 23),  'inton',  8),
+    (datetime.date(2025, 12, 20), 'yonton', 0),
+    (datetime.date(2026, 6, 18),  'inton',  8),
+    (datetime.date(2026, 10, 17), 'inton',  5),
+    (datetime.date(2026, 12, 15), 'yonton', 0),
+    (datetime.date(2027, 6, 13),  'inton',  8),
+    (datetime.date(2027, 12, 10), 'yonton', 0),
 ]
 
-# ピンポイントで正確な値を保証する固定データベース（陰遁の降順に修正）
 DAY_STAR_EXACT_DB = {
     datetime.date(2026, 10, 24): "八白土星",
     datetime.date(2026, 10, 25): "七赤金星",
@@ -902,12 +929,9 @@ DAY_STAR_EXACT_DB = {
 }
 
 def get_day_star(dt: datetime.date) -> str:
-    """データベース直接参照＋アンカー補間による100%正確な日盤中宮星の算出"""
-    # 1. データベースに完全一致する日付が存在する場合は即時返す
     if dt in DAY_STAR_EXACT_DB:
         return DAY_STAR_EXACT_DB[dt]
 
-    # 2. データベース外の日付は正確なアンカーテーブルに基づき補間計算
     active_switch = None
     for entry in EXACT_SWITCH_ANCHORS:
         if dt >= entry[0]:
@@ -932,9 +956,7 @@ def get_day_star(dt: datetime.date) -> str:
     return NINE_STARS[star_idx]
 
 def get_board_for_star(center_star: str) -> dict:
-    """九星気学の標準飛泊順序（後天八卦陣の定位）に従った正しく標準的な盤面配置"""
     center_idx = NINE_STARS.index(center_star)
-    # 後天八卦陣の飛泊Offset: 北西=1, 西=2, 北東=3, 南=4, 北=5, 南西=6, 東=7, 南東=8
     offsets = {
         "北西": 1, "西": 2, "北東": 3, "南": 4,
         "北": 5, "南西": 6, "東": 7, "南東": 8
@@ -950,35 +972,27 @@ def calculate_exact_directions(birth_date: datetime.date, target_date: datetime.
     getsumei_sei = get_getsumei_sei(birth_date)
     user_element = STAR_ELEMENTS[honmei_sei]
     
-    # 日盤
     day_center = get_day_star(target_date)
     day_board = get_board_for_star(day_center)
 
-    # 年盤・月盤（厳密モード用）
     year_center = get_year_star(target_date)
     year_board = get_board_for_star(year_center)
     month_center = get_month_star(target_date)
     month_board = get_board_for_star(month_center)
 
-    # 五黄殺・暗剣殺（日盤）
     goou_dir_day = next((d for d, s in day_board.items() if s == "五黄土星"), None)
     anken_dir_day = OPPOSITE_DIR.get(goou_dir_day) if goou_dir_day else None
 
-    # 本命殺・本命的殺（日盤）
     honmei_dir_day = next((d for d, s in day_board.items() if s == honmei_sei), None)
     teki_dir_day = OPPOSITE_DIR.get(honmei_dir_day) if honmei_dir_day else None
 
-    # 月命殺・月命的殺（日盤）
     getsumei_dir_day = next((d for d, s in day_board.items() if s == getsumei_sei), None)
     getsumei_teki_dir_day = OPPOSITE_DIR.get(getsumei_dir_day) if getsumei_dir_day else None
 
-    # 日破（日支の対冲方位）
     today_zhi = get_day_zhi(target_date)
-    # 日支の反対側（対冲地支）の算出
     opposite_zhi = DI_ZHI[(DI_ZHI.index(today_zhi) + 6) % 12]
     nippa_dir = ZHI_TO_DIR.get(opposite_zhi)
 
-    # 年盤・月盤の凶方位抽出（厳密モード用）
     daikyo_dirs_all = set()
     if goou_dir_day: daikyo_dirs_all.add(goou_dir_day)
     if anken_dir_day: daikyo_dirs_all.add(anken_dir_day)
@@ -1000,23 +1014,18 @@ def calculate_exact_directions(birth_date: datetime.date, target_date: datetime.
     for d, star in day_board.items():
         star_elem = STAR_ELEMENTS[star]
         
-        # 1. 大凶方位（五黄殺・暗剣殺・日破）
         if d in daikyo_dirs_all:
             dir_status[d] = "大凶 ❌"
             daikyo_dirs.append(d)
-        # 2. 凶方位（本命殺・本命的殺・月命殺・月命的殺）
         elif d in [honmei_dir_day, teki_dir_day, getsumei_dir_day, getsumei_teki_dir_day]:
             dir_status[d] = "凶 ⚠️"
             kyo_dirs.append(d)
-        # 3. 大吉（生気・退気：相生関係で運気を強く高める）
         elif star_elem in SOSEI_MAP[user_element]:
             dir_status[d] = "大吉 🌟"
             daikichi_dirs.append(d)
-        # 4. 吉（比和：同じ五行で調和する）
         elif star_elem == user_element:
             dir_status[d] = "吉 ⭕"
             kichi_dirs.append(d)
-        # 5. 吉凶混合（相克関係：気を損なうが凶殺ではない）
         else:
             dir_status[d] = "吉凶 🔺"
             kikyo_dirs.append(d)
@@ -1114,6 +1123,9 @@ def elem_to_romaji(elem):
 # 4. モード選択 & メインコンテンツ
 # ==========================================
 if st.session_state.mode is None:
+    # トップページの広告配置
+    render_a8_ad()
+
     st.markdown('<div class="choice-title">✨ どの鑑定にするニャ？ ✨</div>', unsafe_allow_html=True)
     render_video("cat_video.mp4")
 
@@ -1737,110 +1749,111 @@ elif st.session_state.mode == "four_pillars":
                     render_video("cat_video5.mp4")
                     with st.spinner("四柱推命の盤面と時柱・五行バランスを解析中..."):
                         prompt_fp = f"""
-あなたは四柱推命の真髄を極めた知的な陰陽師です。
+あなたは四柱推命と陰陽五行説を熟知したプロの本格占い師・陰陽師です。
+計算されたユーザーの命式データに基づき、プロフェッショナルで信頼性の高い詳細な本命鑑定を行ってください。
+※文章中で太字（**）などのマークダウン装飾記号は絶対に使わないでください。
 
-ユーザー命式データ:
-- 性別: 『{gender}』
-- 日干（本質）: 『{fp_data['nikkan']}（五行: {fp_data['nikkan_element']}）』
-- メイン格（通変星中心）: 『{fp_data['main_kaku']}格』
-- 五行バランス（要素数）: {fp_data['wuxing_counts']}
-- 年柱干支: 『{fp_data['year_kanto']}』（通変星: {fp_data['year_tsuhen']}）
-- 月柱干支: 『{fp_data['month_kanto']}』（通変星: {fp_data['month_tsuhen']}）
-- 日柱干支: 『{fp_data['day_kanto']}』
-- 時柱干支: 『{fp_data['hour_kanto']}』（通変星: {fp_data['hour_tsuhen']}）
-- 本日の日干支: 『{today_fp['day_kanto']}』
+【ユーザーの命式データ】
+- 生年月日: {valid_date} ({gender})
+- 日干（あなたを表す本質エネルギー）: {fp_data['nikkan']} ({fp_data['nikkan_element']})
+- 年柱干支: {fp_data['year_kanto']} (通変星: {fp_data['year_tsuhen']})
+- 月柱干支: {fp_data['month_kanto']} (通変星: {fp_data['month_tsuhen']})
+- 日柱干支: {fp_data['day_kanto']} (日干: {fp_data['nikkan']})
+- 時柱干支: {fp_data['hour_kanto']} (通変星: {fp_data['hour_tsuhen']})
+- 月支蔵干格（中心となる格局）: {fp_data['main_kaku']}
+- 五行バランス: 木:{fp_data['wuxing_counts']['木']}, 火:{fp_data['wuxing_counts']['火']}, 土:{fp_data['wuxing_counts']['土']}, 金:{fp_data['wuxing_counts']['金']}, 水:{fp_data['wuxing_counts']['水']}
+- 本日の巡り干支: {today_fp['day_kanto']} (日干: {today_fp['nikkan']})
 
-【厳格出力ルール】
-※マークダウンの太字（**）は使用禁止。
-性別（{gender}）およびメイン属性「{fp_data['main_kaku']}格」を含めた高精度な命式データから、四柱推命の観点で深く知性あふれる本日のアドバイスを作成してください。
+【鑑定指示】
+上記データを元に、以下の項目ごとに読み応えのある詳しい解説を記述してください。
 
-【ラッキーカラー＆開運アクション拡張ガイドライン】
-・ラッキーカラーは「固定表記（エメラルドグリーン等）」にせず、日干「{fp_data['nikkan_element']}」と本日の運気バランス（補うべき五行エネルギー）から導き出される最適な色（例: シャンパンゴールド、ターコイズブルー、ラベンダー、ワインレッド、ロイヤルブルー、アースブラウン、ローズピンク等）を2色動的に選出して提示してください。
-・開運アクションは抽象的な精神論を避け、本日すぐ実践できる【具体的・多角的な行動】（例：時間帯別の過ごし方、開運フード・カフェ、身につける小物、デスク周りの環境整理、デジタル・AI活用術、言葉遣いや意識）を盛り込んでください。
+【出力フォーマット】
+■ 日干「{fp_data['nikkan']}」が示す本質と才能
+（日干「{fp_data['nikkan']}（{fp_data['nikkan_element']}）」を持つあなたの根源的な気質、強み、才能を3〜4文でわかりやすく深掘り）
 
-【本日の全体運＆開運ポイント】
-[日干「{fp_data['nikkan']}」および「{fp_data['main_kaku']}格」の本質から見る、本日絶好調な点と注意すべきポイント（2-3文）]
+■ 主星「{fp_data['main_kaku']}」と通変星の配置が解き明かす運命
+（月柱蔵干本気から導かれる「{fp_data['main_kaku']}」を中心に、年柱・月柱の通変星から見た社会的役割や仕事運、人生のテーマを詳しく解説）
 
-【項目別詳細運勢】
-💖 恋愛・対人運: [{gender}の視点も含めた対人関係やコミュニケーションの具体的アドバイス]
-💼 仕事・学業運: [集中力・決断力を高める具体的行動、PC・AI活用や業務上の開運テクニック]
-✈️ 旅行・お出かけ運: [お出かけ時の心構え、巡るべきラッキースポットや移動中の開運法]
+■ 五行バランスの解析とアドバイス
+（五行の過不足（多い要素・不足している要素）を分析し、運気を高めるためのラッキー要素や注意点を解説）
 
-【本日の開運キーアイテム】
-・ラッキーカラー：[日干と本日の五行から導く最適な2色]
-・開運アクション：[本日即実践できる具体的でユニークな開運行動]
+■ 本日の運気（日運）と過ごし方の指針
+（今日巡ってくる「{today_fp['day_kanto']}」のエネルギーが、あなたの「{fp_data['nikkan']}」に与える影響と、最高の1日にするための具体的な行動アドバイス）
 """
                         client = genai.Client(api_key=active_key)
                         response_fp = client.models.generate_content(
                             model=GEMINI_MODEL_NAME,
-                            contents=prompt_fp,
-                            config=types.GenerateContentConfig(
-                                temperature=1.0
-                            )
+                            contents=prompt_fp
                         )
                         st.session_state.four_pillars_text = response_fp.text
                         st.session_state.fp_data = fp_data
+                        st.session_state.valid_date = valid_date
                         st.session_state.gender = gender
                 status_holder_fp.empty()
             except Exception as e:
                 st.error(f"四柱推命鑑定中にエラーが発生しました: {e}")
 
-    if st.session_state.four_pillars_text and "fp_data" in st.session_state:
-        fp = st.session_state.fp_data
-        user_gender = st.session_state.get("gender", "女性")
+    if st.session_state.four_pillars_text:
+        fp_data = st.session_state.get("fp_data", {})
+        valid_date = st.session_state.get("valid_date", "")
+        gender = st.session_state.get("gender", "")
+
+        meishiki_table_html = f"""
+        <table class="meishiki-table">
+            <thead>
+                <tr>
+                    <th>柱</th>
+                    <th>時柱</th>
+                    <th>日柱</th>
+                    <th>月柱</th>
+                    <th>年柱</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="color:#FFE066; font-weight:bold;">通変星</td>
+                    <td>{fp_data.get('hour_tsuhen', '不明')}</td>
+                    <td class="highlight-nikkan">（日干）</td>
+                    <td>{fp_data.get('month_tsuhen', '―')}</td>
+                    <td>{fp_data.get('year_tsuhen', '―')}</td>
+                </tr>
+                <tr>
+                    <td style="color:#FFE066; font-weight:bold;">天干地支</td>
+                    <td style="font-size:1.05rem;">{fp_data.get('hour_kanto', '不明')}</td>
+                    <td class="highlight-nikkan" style="font-size:1.15rem; font-weight:bold;">{fp_data.get('day_kanto', '―')}</td>
+                    <td style="font-size:1.05rem;">{fp_data.get('month_kanto', '―')}</td>
+                    <td style="font-size:1.05rem;">{fp_data.get('year_kanto', '―')}</td>
+                </tr>
+            </tbody>
+        </table>
+        """
 
         st.markdown(f"""
-        <div class="notranslate" style="background: rgba(10, 14, 26, 0.65); backdrop-filter: blur(10px); border: 1.5px solid rgba(255, 215, 0, 0.8); border-radius: 14px; padding: 1.2rem; margin-top: 1.2rem; box-shadow: 0 4px 20px rgba(0,0,0,0.5);">
-            <h3 style="color:#FFE066; text-align:center; margin-top:0; font-size: 1.25rem; text-shadow:0 2px 4px #000;">📜 あなたの四柱推命 精密命式チャート 📜</h3>
-            <div style="text-align:center; color:#CCCCCC; font-size:0.85rem; margin-bottom:8px;">性別: {user_gender}</div>
-            <table class="meishiki-table">
-                <tr>
-                    <th>項目</th>
-                    <th>年柱（祖先・幼少）</th>
-                    <th>月柱（社会・青年）</th>
-                    <th>日柱（自分・本質）</th>
-                    <th>時柱（晩年・子孫）</th>
-                </tr>
-                <tr>
-                    <td style="color:#FFE066;">天干地支</td>
-                    <td>{fp['year_kanto']}</td>
-                    <td>{fp['month_kanto']}</td>
-                    <td class="highlight-nikkan">{fp['day_kanto']}</td>
-                    <td>{fp['hour_kanto']}</td>
-                </tr>
-                <tr>
-                    <td style="color:#FFE066;">通変星</td>
-                    <td>{fp['year_tsuhen']}</td>
-                    <td style="color:#FFD700; background:rgba(255,215,0,0.25);">{fp['month_tsuhen']}</td>
-                    <td style="color:#4EAEFF;">日干（主星）</td>
-                    <td>{fp['hour_tsuhen']}</td>
-                </tr>
-            </table>
-            <div style="text-align:center; color:#E0B0FF; font-size:0.95rem; font-weight:bold;">
-                ✨ あなたの主格: <span style="font-size:1.2rem; color:#FFD700;">【{fp['main_kaku']}格】</span> / 日干: <span style="font-size:1.2rem; color:#FFD700;">【{fp['nikkan']}】</span>（五行: {fp['nikkan_element']}）
+        <div class="notranslate" style="background: rgba(12, 16, 28, 0.55); backdrop-filter: blur(8px); border: 1.5px solid rgba(212, 175, 55, 0.8); border-radius: 14px; padding: 1.5rem; margin-top: 1.2rem;">
+            <h3 style="color:#FFE066; text-align:center; margin-top:0; font-size: 1.3rem;">📜 あなたの命式（四柱推命） 📜</h3>
+            <div style="text-align:center; color:#CCCCCC; font-size:0.88rem; margin-bottom:0.5rem;">生年月日: {valid_date} ({gender})</div>
+            {meishiki_table_html}
+            <div style="text-align:center; margin-top:0.6rem; color:#FFE066; font-size:0.92rem;">
+                <b>中心となる格（主星）: <span style="color:#FFD700; font-size:1.05rem;">【{fp_data.get('main_kaku', '―')}】</span></b>
             </div>
         </div>
         """, unsafe_allow_html=True)
 
-        st.markdown("<h4 style='color:#FFE066; text-align:center; margin-top:1.5rem; margin-bottom:0.2rem; text-shadow:0 2px 4px #000;'>☯️ 五行エネルギーバランス ☯️</h4>", unsafe_allow_html=True)
-        st.markdown(f"<p style='text-align:center; color:#E0E0E0; font-size:0.85rem; margin-bottom:0;'>※あなたの魂のシンボル（日干: <b>{fp['nikkan_element']}</b>）を頂点（真上）に配置しています</p>", unsafe_allow_html=True)
-        render_wuxing_radar(fp['wuxing_counts'], fp['nikkan_element'])
+        st.markdown("<h4 style='color:#FFE066; margin-top:1.4rem; margin-bottom:0.8rem; text-shadow:0 2px 4px #000; text-align:center;'>📊 命式の五行バランス 📊</h4>", unsafe_allow_html=True)
+        render_wuxing_radar(fp_data.get("wuxing_counts", {}), fp_data.get("nikkan_element", "木"))
 
-        st.markdown("<h4 style='color:#FFE066; margin-top:1.2rem; margin-bottom:0.8rem; text-shadow:0 2px 4px #000;'>【本日の四柱推命 開運鑑定】</h4>", unsafe_allow_html=True)
-        
-        lines = [re.sub(r'\*+', '', l).strip() for l in st.session_state.four_pillars_text.split('\n') if l.strip()]
-        for line in lines:
-            line_colored = colorize_lucky_colors(line)
-            
-            if any(line.startswith(prefix) for prefix in ["💖", "💼", "✈️"]):
-                parts = line_colored.split(":", 1)
+        st.markdown("<h4 style='color:#FFE066; margin-top:1.2rem; margin-bottom:0.8rem; text-shadow:0 2px 4px #000;'>【四柱推命 命式詳細解読】</h4>", unsafe_allow_html=True)
+
+        lines_fp = [re.sub(r'\*+', '', l).strip() for l in st.session_state.four_pillars_text.split('\n') if l.strip()]
+        for line in lines_fp:
+            line_colored = format_wuxing_color(colorize_lucky_colors(line))
+            if line.startswith("■ "):
                 st.markdown(f"""
-                <div class="glass-card-box">
-                    <div style="color:#FFE066; font-size:1.05rem; font-weight:bold; margin-bottom:6px;">{parts[0]}</div>
-                    <div style="color:#FFFFFF; font-size:0.98rem; line-height:1.7; font-weight:600;">{parts[1] if len(parts)>1 else ""}</div>
+                <div style="color:#FFD700; font-size:1.15rem; font-weight:bold; margin-top:1.4rem; margin-bottom:0.5rem; border-bottom:1px solid #FFD700; padding-bottom:0.3rem;">
+                    {line_colored}
                 </div>
                 """, unsafe_allow_html=True)
-            elif not line.startswith("【"):
+            else:
                 st.markdown(f"""
                 <div class="glass-card-box">
                     <div style="color:#FFFFFF; font-size:0.98rem; line-height:1.7; font-weight:600;">{line_colored}</div>
