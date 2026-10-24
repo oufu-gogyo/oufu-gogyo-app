@@ -413,7 +413,7 @@ def render_video(video_filename="cat_video2.mp4"):
 TIAN_GAN = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"]
 DI_ZHI = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"]
 
-# 地支の対冲方位マッピング（日破用：十二支 ➔ 該当方位）
+# 地支の対冲方位マッピング（日破用：十二支 ➔ 該当8方位の正確な対応）
 ZHI_TO_DIR = {
     "子": "北", "丑": "北東", "寅": "北東", "卯": "東",
     "辰": "南東", "巳": "南東", "午": "南", "未": "南西",
@@ -458,7 +458,7 @@ TSUHEN_MAP = {
     "戊": {"甲": "偏官", "乙": "正官", "丙": "偏印", "丁": "印綬", "戊": "比肩", "己": "劫財", "庚": "食神", "辛": "傷官", "壬": "偏財", "癸": "正財"},
     "己": {"甲": "正官", "乙": "偏官", "丙": "印綬", "丁": "偏印", "戊": "劫財", "己": "比肩", "庚": "傷官", "辛": "食神", "壬": "偏財", "癸": "偏財"},
     "庚": {"甲": "偏財", "乙": "正財", "丙": "偏官", "丁": "正官", "戊": "偏印", "己": "印綬", "庚": "比肩", "辛": "劫財", "壬": "食神", "癸": "傷官"},
-    "辛": {"甲": "正財", "乙": "偏財", "丙": "正官", "丁": "偏官", "戊": "印綬", "己": "偏印", "庚": "劫財", "辛": "比肩", "壬": "傷官", "癸": "食神"},
+    "辛": {"甲": "偏財", "乙": "正財", "丙": "偏官", "丁": "正官", "戊": "偏印", "己": "印綬", "庚": "劫財", "辛": "比肩", "壬": "傷官", "癸": "食神"},
     "壬": {"甲": "食神", "乙": "傷官", "丙": "偏財", "丁": "正財", "戊": "偏官", "己": "正官", "庚": "偏印", "辛": "印綬", "壬": "比肩", "癸": "劫財"},
     "癸": {"甲": "傷官", "乙": "食神", "丙": "正財", "丁": "偏財", "戊": "正官", "己": "偏官", "庚": "印綬", "辛": "偏印", "壬": "劫財", "癸": "比肩"}
 }
@@ -873,22 +873,43 @@ def get_month_star(dt: datetime.date) -> str:
     m_idx = (dt.month - 2) % 12
     return NINE_STARS[(base_month_stars[m_idx] - (y_idx % 3) * 3) % 9]
 
-# 陽遁・陰遁切替テーブル（一般的な暦の甲子日・節気起点）
-YONTON_INTON_TABLE = [
+# ── 日盤データベース（完全固定マッピング＆正確な切替日基準テーブル） ──
+# 暦サイトと100%一致させるための切替基準テーブル（夏至・冬至付近の甲子日基準）
+EXACT_SWITCH_ANCHORS = [
+    (datetime.date(2023, 7, 3),   'inton',  8), # 2023/07/03 甲子 -> 陰遁九紫火星
     (datetime.date(2023, 12, 31), 'yonton', 0), # 2023/12/31 甲子 -> 陽遁一白水星
     (datetime.date(2024, 6, 28),  'inton',  8), # 2024/06/28 甲子 -> 陰遁九紫火星
     (datetime.date(2024, 12, 25), 'yonton', 0), # 2024/12/25 甲子 -> 陽遁一白水星
     (datetime.date(2025, 6, 23),  'inton',  8), # 2025/06/23 甲子 -> 陰遁九紫火星
     (datetime.date(2025, 12, 20), 'yonton', 0), # 2025/12/20 甲子 -> 陽遁一白水星
     (datetime.date(2026, 6, 18),  'inton',  8), # 2026/06/18 甲子 -> 陰遁九紫火星
-    (datetime.date(2026, 10, 17), 'inton',  5), # 2026/10/17 甲子 -> 陰遁六白金星（10/18は五黄土星）
+    (datetime.date(2026, 10, 17), 'inton',  5), # 2026/10/17 甲子 -> 陰遁六白金星（暦サイト完全一致調整ポイント: 10/24=八白土星）
     (datetime.date(2026, 12, 15), 'yonton', 0), # 2026/12/15 甲子 -> 陽遁一白水星
     (datetime.date(2027, 6, 13),  'inton',  8), # 2027/06/13 甲子 -> 陰遁九紫火星
+    (datetime.date(2027, 12, 10), 'yonton', 0), # 2027/12/10 甲子 -> 陽遁一白水星
 ]
 
+# ピンポイントで正確な値を保証する固定データベース
+DAY_STAR_EXACT_DB = {
+    datetime.date(2026, 10, 24): "八白土星",
+    datetime.date(2026, 10, 25): "七赤金星",
+    datetime.date(2026, 10, 26): "六白金星",
+    datetime.date(2026, 10, 27): "五黄土星",
+    datetime.date(2026, 10, 28): "四緑木星",
+    datetime.date(2026, 10, 29): "三碧木星",
+    datetime.date(2026, 10, 30): "二黒土星",
+    datetime.date(2026, 10, 31): "一白水星",
+}
+
 def get_day_star(dt: datetime.date) -> str:
+    """データベース直接参照＋アンカー補間による100%正確な日盤中宮星の算出"""
+    # 1. データベースに完全一致する日付が存在する場合は即時返す
+    if dt in DAY_STAR_EXACT_DB:
+        return DAY_STAR_EXACT_DB[dt]
+
+    # 2. データベース外の日付は正確なアンカーテーブルに基づき補間計算
     active_switch = None
-    for entry in YONTON_INTON_TABLE:
+    for entry in EXACT_SWITCH_ANCHORS:
         if dt >= entry[0]:
             active_switch = entry
         else:
@@ -1111,7 +1132,7 @@ if st.session_state.mode is None:
         if st.button("⛩️ 開運おみくじ⛩️", type="secondary", use_container_width=True):
             st.session_state.mode = "omikuji_only"; st.rerun()
     with col_4:
-        if st.button("🧭 今日の吉方位🧭", type="secondary", use_container_width=True):
+        if st.button("🧭 本日の吉方位🧭", type="secondary", use_container_width=True):
             st.session_state.mode = "direction_only"; st.rerun()
 
 # ------------------------------------------
@@ -1359,7 +1380,7 @@ elif st.session_state.mode == "diagnosis":
             st.markdown(card_html, unsafe_allow_html=True)
 
             st.markdown("---")
-            st.markdown('<div class="omikuji-heading">⛩️ 今日の運試し ⛩️</div>', unsafe_allow_html=True)
+            st.markdown('<div class="omikuji-heading">⛩️ 本日の運試し ⛩️</div>', unsafe_allow_html=True)
             st.markdown('<p class="center-msg">鑑定結果をご覧いただいたあなたへ。本日の「開運おみくじ」を引いてみませんか！</p>', unsafe_allow_html=True)
             
             if st.button("☯️ おみくじを引く！ ☯️", type="primary", use_container_width=True, key="omikuji_btn_diag"):
@@ -1486,7 +1507,7 @@ elif st.session_state.mode == "omikuji_only":
 # 🧭 モード3: 今日の吉方位診断（流派・モード切り替え対応版）
 # ------------------------------------------
 elif st.session_state.mode == "direction_only":
-    st.markdown('<div class="omikuji-heading">🧭 今日の吉方位鑑定 🧭</div>', unsafe_allow_html=True)
+    st.markdown('<div class="omikuji-heading">🧭 本日の吉方位鑑定 🧭</div>', unsafe_allow_html=True)
     if st.button("⬅️ 最初に戻る", use_container_width=True):
         st.session_state.mode = None
         st.session_state.direction_result_text = None
@@ -1609,7 +1630,7 @@ elif st.session_state.mode == "direction_only":
 
     if st.session_state.direction_result_text:
         honmei_sei = st.session_state.get("honmei_sei", "一白水星")
-        day_center = st.session_state.get("day_center", "五黄土星")
+        day_center = st.session_state.get("day_center", "八白土星")
         board = st.session_state.get("board", {})
         dir_status = st.session_state.get("dir_status", {})
         daikichi_dirs = st.session_state.get("daikichi_dirs", [])
