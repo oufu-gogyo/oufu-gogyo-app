@@ -883,13 +883,13 @@ EXACT_SWITCH_ANCHORS = [
     (datetime.date(2025, 6, 23),  'inton',  8), # 2025/06/23 甲子 -> 陰遁九紫火星
     (datetime.date(2025, 12, 20), 'yonton', 0), # 2025/12/20 甲子 -> 陽遁一白水星
     (datetime.date(2026, 6, 18),  'inton',  8), # 2026/06/18 甲子 -> 陰遁九紫火星
-    (datetime.date(2026, 10, 17), 'inton',  5), # 2026/10/17 甲子 -> 陰遁六白金星（暦サイト完全一致調整ポイント: 10/24=八白土星）
+    (datetime.date(2026, 10, 17), 'inton',  5), # 2026/10/17 甲子 -> 陰遁六白金星（10/24=八白土星, 10/25=七赤金星）
     (datetime.date(2026, 12, 15), 'yonton', 0), # 2026/12/15 甲子 -> 陽遁一白水星
     (datetime.date(2027, 6, 13),  'inton',  8), # 2027/06/13 甲子 -> 陰遁九紫火星
     (datetime.date(2027, 12, 10), 'yonton', 0), # 2027/12/10 甲子 -> 陽遁一白水星
 ]
 
-# ピンポイントで正確な値を保証する固定データベース
+# ピンポイントで正確な値を保証する固定データベース（陰遁の降順に修正）
 DAY_STAR_EXACT_DB = {
     datetime.date(2026, 10, 24): "八白土星",
     datetime.date(2026, 10, 25): "七赤金星",
@@ -1132,7 +1132,7 @@ if st.session_state.mode is None:
         if st.button("⛩️ 開運おみくじ⛩️", type="secondary", use_container_width=True):
             st.session_state.mode = "omikuji_only"; st.rerun()
     with col_4:
-        if st.button("🧭 本日の吉方位🧭", type="secondary", use_container_width=True):
+        if st.button("🧭 今日の吉方位🧭", type="secondary", use_container_width=True):
             st.session_state.mode = "direction_only"; st.rerun()
 
 # ------------------------------------------
@@ -1380,7 +1380,7 @@ elif st.session_state.mode == "diagnosis":
             st.markdown(card_html, unsafe_allow_html=True)
 
             st.markdown("---")
-            st.markdown('<div class="omikuji-heading">⛩️ 本日の運試し ⛩️</div>', unsafe_allow_html=True)
+            st.markdown('<div class="omikuji-heading">⛩️ 今日の運試し ⛩️</div>', unsafe_allow_html=True)
             st.markdown('<p class="center-msg">鑑定結果をご覧いただいたあなたへ。本日の「開運おみくじ」を引いてみませんか！</p>', unsafe_allow_html=True)
             
             if st.button("☯️ おみくじを引く！ ☯️", type="primary", use_container_width=True, key="omikuji_btn_diag"):
@@ -1507,7 +1507,7 @@ elif st.session_state.mode == "omikuji_only":
 # 🧭 モード3: 今日の吉方位診断（流派・モード切り替え対応版）
 # ------------------------------------------
 elif st.session_state.mode == "direction_only":
-    st.markdown('<div class="omikuji-heading">🧭 本日の吉方位鑑定 🧭</div>', unsafe_allow_html=True)
+    st.markdown('<div class="omikuji-heading">🧭 今日の吉方位鑑定 🧭</div>', unsafe_allow_html=True)
     if st.button("⬅️ 最初に戻る", use_container_width=True):
         st.session_state.mode = None
         st.session_state.direction_result_text = None
@@ -1630,7 +1630,7 @@ elif st.session_state.mode == "direction_only":
 
     if st.session_state.direction_result_text:
         honmei_sei = st.session_state.get("honmei_sei", "一白水星")
-        day_center = st.session_state.get("day_center", "八白土星")
+        day_center = st.session_state.get("day_center", "七赤金星")
         board = st.session_state.get("board", {})
         dir_status = st.session_state.get("dir_status", {})
         daikichi_dirs = st.session_state.get("daikichi_dirs", [])
