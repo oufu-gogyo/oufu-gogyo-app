@@ -1148,7 +1148,7 @@ if st.session_state.mode is None:
         if st.button("⛩️ 開運おみくじ⛩️", type="secondary", use_container_width=True):
             st.session_state.mode = "omikuji_only"; st.rerun()
     with col_4:
-        if st.button("🧭 今日の吉方位🧭", type="secondary", use_container_width=True):
+        if st.button("🧭 本日の吉方位🧭", type="secondary", use_container_width=True):
             st.session_state.mode = "direction_only"; st.rerun()
 
 # ------------------------------------------
@@ -1794,6 +1794,8 @@ elif st.session_state.mode == "four_pillars":
                         )
                         st.session_state.four_pillars_text = response_fp.text
                         st.session_state.fp_data = fp_data
+                        st.session_state.today_fp = today_fp
+                        st.session_state.today_jst = today_jst
                         st.session_state.valid_date = valid_date
                         st.session_state.gender = gender
                 status_holder_fp.empty()
@@ -1802,49 +1804,51 @@ elif st.session_state.mode == "four_pillars":
 
     if st.session_state.four_pillars_text:
         fp_data = st.session_state.get("fp_data", {})
+        today_fp = st.session_state.get("today_fp", {})
+        today_jst = st.session_state.get("today_jst", get_jst_today())
         valid_date = st.session_state.get("valid_date", "")
         gender = st.session_state.get("gender", "")
 
-        meishiki_table_html = f"""
-        <table class="meishiki-table">
-            <thead>
-                <tr>
-                    <th>柱</th>
-                    <th>時柱</th>
-                    <th>日柱</th>
-                    <th>月柱</th>
-                    <th>年柱</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td style="color:#FFE066; font-weight:bold;">通変星</td>
-                    <td>{fp_data.get('hour_tsuhen', '不明')}</td>
-                    <td class="highlight-nikkan">（日干）</td>
-                    <td>{fp_data.get('month_tsuhen', '―')}</td>
-                    <td>{fp_data.get('year_tsuhen', '―')}</td>
-                </tr>
-                <tr>
-                    <td style="color:#FFE066; font-weight:bold;">天干地支</td>
-                    <td style="font-size:1.05rem;">{fp_data.get('hour_kanto', '不明')}</td>
-                    <td class="highlight-nikkan" style="font-size:1.15rem; font-weight:bold;">{fp_data.get('day_kanto', '―')}</td>
-                    <td style="font-size:1.05rem;">{fp_data.get('month_kanto', '―')}</td>
-                    <td style="font-size:1.05rem;">{fp_data.get('year_kanto', '―')}</td>
-                </tr>
-            </tbody>
-        </table>
-        """
-
-        st.markdown(f"""
+        card_container_html = f"""
         <div class="notranslate" style="background: rgba(12, 16, 28, 0.55); backdrop-filter: blur(8px); border: 1.5px solid rgba(212, 175, 55, 0.8); border-radius: 14px; padding: 1.5rem; margin-top: 1.2rem;">
             <h3 style="color:#FFE066; text-align:center; margin-top:0; font-size: 1.3rem;">📜 あなたの命式（四柱推命） 📜</h3>
             <div style="text-align:center; color:#CCCCCC; font-size:0.88rem; margin-bottom:0.5rem;">生年月日: {valid_date} ({gender})</div>
-            {meishiki_table_html}
+            <table class="meishiki-table">
+                <thead>
+                    <tr>
+                        <th>柱</th>
+                        <th>時柱</th>
+                        <th>日柱</th>
+                        <th>月柱</th>
+                        <th>年柱</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="color:#FFE066; font-weight:bold;">通変星</td>
+                        <td>{fp_data.get('hour_tsuhen', '不明')}</td>
+                        <td class="highlight-nikkan">（日干）</td>
+                        <td>{fp_data.get('month_tsuhen', '―')}</td>
+                        <td>{fp_data.get('year_tsuhen', '―')}</td>
+                    </tr>
+                    <tr>
+                        <td style="color:#FFE066; font-weight:bold;">天干地支</td>
+                        <td style="font-size:1.05rem;">{fp_data.get('hour_kanto', '不明')}</td>
+                        <td class="highlight-nikkan" style="font-size:1.15rem; font-weight:bold;">{fp_data.get('day_kanto', '―')}</td>
+                        <td style="font-size:1.05rem;">{fp_data.get('month_kanto', '―')}</td>
+                        <td style="font-size:1.05rem;">{fp_data.get('year_kanto', '―')}</td>
+                    </tr>
+                </tbody>
+            </table>
             <div style="text-align:center; margin-top:0.6rem; color:#FFE066; font-size:0.92rem;">
                 <b>中心となる格（主星）: <span style="color:#FFD700; font-size:1.05rem;">【{fp_data.get('main_kaku', '―')}】</span></b>
             </div>
+            <div style="text-align:center; margin-top:0.6rem; padding:8px; background:rgba(255, 215, 0, 0.15); border:1px solid rgba(255,215,0,0.4); border-radius:8px; color:#FFFFFF; font-size:0.95rem;">
+                📅 <b>本日の巡り干支（{today_jst}）:</b> <span style="color:#FFD700; font-size:1.1rem; font-weight:bold;">【{today_fp.get('day_kanto', '―')}】</span>
+            </div>
         </div>
-        """, unsafe_allow_html=True)
+        """
+        st.markdown(card_container_html, unsafe_allow_html=True)
 
         st.markdown("<h4 style='color:#FFE066; margin-top:1.4rem; margin-bottom:0.8rem; text-shadow:0 2px 4px #000; text-align:center;'>📊 命式の五行バランス 📊</h4>", unsafe_allow_html=True)
         render_wuxing_radar(fp_data.get("wuxing_counts", {}), fp_data.get("nikkan_element", "木"))
