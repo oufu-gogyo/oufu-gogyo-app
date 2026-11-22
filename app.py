@@ -24,7 +24,7 @@ load_dotenv()
 ENV_GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 
 # 安定版モデル名
-GEMINI_MODEL_NAME = "gemini-3.8-flash"
+GEMINI_MODEL_NAME = "gemini-3.5-flash-lite"
 
 # ==========================================
 # 1. ページ基本設定 & Session State
@@ -1871,3 +1871,4 @@ elif st.session_state.mode == "four_pillars":
                 </div>
 
                 """, unsafe_allow_html=True)
+
